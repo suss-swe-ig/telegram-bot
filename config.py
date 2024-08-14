@@ -4,7 +4,7 @@ from dotenv import dotenv_values
 class ConfigException(Exception):
     pass
 
-def readConfig() -> Tuple[str, List[str]]:
+def readConfig() -> Tuple[str, List[str], str]:
     config = dotenv_values(".env")
     try:
         token = config["TOKEN"]
@@ -14,4 +14,8 @@ def readConfig() -> Tuple[str, List[str]]:
         admins = config["ADMINS"].split(",")
     except KeyError:
         raise ConfigException("Missing Admins List")
-    return token, admins
+    try:
+        database = config["DATABASE"]
+    except KeyError:
+        database = "database.db"
+    return token, admins, database
