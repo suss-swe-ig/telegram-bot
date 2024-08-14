@@ -54,7 +54,7 @@ def _addHandlers(bot: AsyncTeleBot, admins: List[str], db: shelve.Shelf, logger:
                     msg = f"Invalid telegram invitation link {link}"
             else:
                 logger.error(f"{message.from_user.username} attempted to add malformed unit code {unitcode}")
-                msg = "Malformed unit code {unitcode}"
+                msg = f"Malformed unit code {unitcode}"
         else:
             logger.error(f"Unauthorised user f{_getName(message)} attempted to perform {message.text}")
             msg = f"{_getName(message)} is Unauthorised user"
