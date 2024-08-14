@@ -17,6 +17,9 @@ def getName(message: telebot.types.Message) -> str:
         name = message.from_user.full_name
     return name
 
+def validUnitCode(unitcode:str) -> bool:
+    return len(unitcode) == 6 and unitcode[:3].islapha() and unitcode[3:].isnumeric()
+
 def addHandlers(bot: AsyncTeleBot, admins: List[str], db: shelve.Shelf, logger:logging.Logger) -> None:
 
     @bot.message_handler(commands=['start','welcome'])
@@ -35,7 +38,7 @@ def addHandlers(bot: AsyncTeleBot, admins: List[str], db: shelve.Shelf, logger:l
             unitcode = tokens[1].upper()
             unitname = " ".join(tokens[3:])
             link = tokens[2]
-            if unitcode[:3].isalpha() and unitcode[3:].isnumeric() and len(unitcode[3:]) == 3:
+            if validUnitCode(unitcode):
                 if link.startswith("https://t.me/"):
                     if len(unitname) > 0:
                         db[unitcode] = (unitname, link)
@@ -68,7 +71,7 @@ def addHandlers(bot: AsyncTeleBot, admins: List[str], db: shelve.Shelf, logger:l
         if message.from_user.username in admins:
             tokens = message.text.split()
             unitcode = tokens[1].upper()
-            if unitcode[:3].isalpha() and unitcode[3:].isnumeric() and len(unitcode[3:]) == 3:
+            if validUnitCode(unitcode):
                 if unitcode in db:
                     success = True
                     del db[unitcode]
@@ -103,9 +106,10 @@ def addHandlers(bot: AsyncTeleBot, admins: List[str], db: shelve.Shelf, logger:l
                     units = []
                 units.append(" ".join(db[u]))
                 units.append("")
+                prev = u
             if len(units) > 0:
                 bot.reply_to(message, "\n".join(units))
-        elif unitcode[:3].isalpha() and unitcode[3:].isnumeric() and len(unitcode[3:]) == 3:
+        elif validUnitCode(unitcode):
             if unitcode in db:
                 success = True
                 unitname, link = db[unitcode]
