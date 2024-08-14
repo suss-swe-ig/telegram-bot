@@ -11,7 +11,7 @@ def readConfig() -> Tuple[str, List[str]]:
     except KeyError:
         raise ConfigException("Missing API Token")
     try:
-        admins = config["ADMIN"].split(",")
+        admins = config["ADMINS"].split(",")
     except KeyError:
-        raise ConfigException("Missing Admin List")
+        raise ConfigException("Missing Admins List")
     return token, admins
