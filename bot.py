@@ -18,7 +18,7 @@ def _getName(message: telebot.types.Message) -> str:
     return name
 
 def _validUnitCode(unitcode:str) -> bool:
-    return len(unitcode) == 6 and unitcode[:3].islapha() and unitcode[3:].isnumeric()
+    return len(unitcode) == 6 and unitcode[:3].isalpha() and unitcode[3:].isnumeric()
 
 def _addHandlers(bot: AsyncTeleBot, admins: List[str], db: shelve.Shelf, logger:logging.Logger) -> None:
 
