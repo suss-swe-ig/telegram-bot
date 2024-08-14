@@ -98,17 +98,20 @@ def addHandlers(bot: AsyncTeleBot, admins: List[str], db: shelve.Shelf, logger:l
         unitcode = tokens[1].upper()
         if unitcode == "ALL":
             unitcodes = sorted([key for key in db])
-            prev = unitcodes[0][:3]
-            for u in unitcodes:
+            if len(unitcodes) == 0:
+                bot.reply_to(message, "No telegram invitation links available")
+            else:
+                prev = unitcodes[0][:3]
                 units = []
-                if prev != u[:3]:
+                for u in unitcodes:
+                    if prev != u[:3]:
+                        bot.reply_to(message, "\n".join(units))
+                        units = []
+                    units.append(" ".join(db[u]))
+                    units.append("")
+                    prev = u
+                if len(units) > 0:
                     bot.reply_to(message, "\n".join(units))
-                    units = []
-                units.append(" ".join(db[u]))
-                units.append("")
-                prev = u
-            if len(units) > 0:
-                bot.reply_to(message, "\n".join(units))
         elif validUnitCode(unitcode):
             if unitcode in db:
                 success = True
