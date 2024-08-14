@@ -17,8 +17,8 @@ def _getName(message: telebot.types.Message) -> str:
         name = message.from_user.full_name
     return name
 
-def _validUnitCode(unitcode:str) -> bool:
-    return len(unitcode) == 6 and unitcode[:3].isalpha() and unitcode[3:].isnumeric()
+def _validUnitCode(unitCode:str) -> bool:
+    return len(unitCode) == 6 and unitCode[:3].isalpha() and unitCode[3:].isnumeric()
 
 def _addHandlers(bot: AsyncTeleBot, admins: List[str], db: shelve.Shelf, logger:logging.Logger) -> None:
 
@@ -29,32 +29,32 @@ def _addHandlers(bot: AsyncTeleBot, admins: List[str], db: shelve.Shelf, logger:
     @bot.message_handler(commands=['add'])
     async def add(message:telebot.types.Message) -> telebot.types.Message:
         """
-        /add [unitcode] [link] [title]
+        /add [unitCode] [link] [title]
         """
         success = False
         msg = ""
         if message.from_user.username in admins:
             tokens = message.text.split()
-            unitcode = tokens[1].upper()
-            unitname = " ".join(tokens[3:])
+            unitCode = tokens[1].upper()
+            unitName = " ".join(tokens[3:])
             link = tokens[2]
-            if _validUnitCode(unitcode):
+            if _validUnitCode(unitCode):
                 if link.startswith("https://t.me/"):
-                    if len(unitname) > 0:
-                        db[unitcode] = (unitname, link)
+                    if len(unitName) > 0:
+                        db[unitCode] = (unitName, link)
                         db.sync()
                         success = True
-                        logger.info(f"{message.from_user.username} added {unitcode}: {unitname}")
-                        await bot.reply_to(message, f"Success. Added {link} for {unitcode}: {unitname}")
+                        logger.info(f"{message.from_user.username} added {unitCode} {unitName}")
+                        await bot.reply_to(message, f"Success. Added {link} for {unitCode} {unitName}")
                     else:
-                        logger.error(f"{message.from_user.username} attempted to add {unitcode} without name")
-                        msg = f"unit name not included for {unitcode}"
+                        logger.error(f"{message.from_user.username} attempted to add {unitCode} without name")
+                        msg = f"unit name not included for {unitCode}"
                 else:
-                    logger.error(f"{message.from_user.username} attempted to add invalid telegram invitation link for {unitcode}")
+                    logger.error(f"{message.from_user.username} attempted to add invalid telegram invitation link for {unitCode}")
                     msg = f"Invalid telegram invitation link {link}"
             else:
-                logger.error(f"{message.from_user.username} attempted to add malformed unit code {unitcode}")
-                msg = f"Malformed unit code {unitcode}"
+                logger.error(f"{message.from_user.username} attempted to add {unitCode} is a malformed unit code.")
+                msg = f"{unitCode} is a malformed unit code."
         else:
             logger.error(f"Unauthorised user f{_getName(message)} attempted to perform {message.text}")
             msg = f"{_getName(message)} is Unauthorised user"
@@ -64,63 +64,68 @@ def _addHandlers(bot: AsyncTeleBot, admins: List[str], db: shelve.Shelf, logger:
     @bot.message_handler(commands=["rm"])
     async def remove(message:telebot.types.Message) -> telebot.types.Message:
         """
-        /rm [unitcode]
+        /rm [unitCode]
         """
         success = False
         msg = ""
         if message.from_user.username in admins:
             tokens = message.text.split()
-            unitcode = tokens[1].upper()
-            if _validUnitCode(unitcode):
-                if unitcode in db:
+            unitCode = tokens[1].upper()
+            if _validUnitCode(unitCode):
+                if unitCode in db:
+                    unitName, link = db[unitCode]
                     success = True
-                    del db[unitcode]
-                    logger.info(f"{message.from_user.username} removed {unitcode}")
-                    await bot.reply_to(message, f"Success. {unitcode} removed")
+                    del db[unitCode]
+                    logger.info(f"{message.from_user.username} removed {unitCode}")
+                    await bot.reply_to(message, f"Success. {unitCode} removed.\n\n To re-add, run:\n\n /add {unitCode} {link} {unitName}")
                 else:
-                    msg = "No telegram group for unit code {unitcode}"
+                    msg = f"No known telegram group for {unitCode}"
             else:
-                msg = "Malformed unit code"
+                msg = f"{unitCode} is a malformed unit code."
         else:
-            msg = f"{_getName(message)} is Unauthorised user"
+            msg = f"{_getName(message)} is an unauthorised user"
         if not success:
-            await bot.reply(message, f"Fail because {msg}")
+            await bot.reply_to(message, f"Fail because {msg}")
     
     @bot.message_handler(commands = ["get"])
     async def get(message:telebot.types.Message) -> telebot.types.Message:
         """
         /get all            return all telegram invitation links
-        /get [unitcode]     return telegram invitation link for a specific unit
+        /get [unitCode]     return telegram invitation link for a specific unit
         """
         success = False
         msg = ""
         tokens = message.text.split()
-        unitcode = tokens[1].upper()
-        if unitcode == "ALL":
-            unitcodes = sorted([key for key in db])
-            if len(unitcodes) == 0:
-                bot.reply_to(message, "No telegram invitation links available")
+        unitCode = tokens[1].upper()
+        if unitCode == "ALL":
+            if len(db) == 0:
+                await bot.reply_to(message, "No telegram groups available")
             else:
-                prev = unitcodes[0][:3]
-                units = []
-                for u in unitcodes:
-                    if prev != u[:3]:
-                        bot.reply_to(message, "\n".join(units))
-                        units = []
-                    units.append(" ".join(db[u]))
-                    units.append("")
-                    prev = u
-                if len(units) > 0:
-                    bot.reply_to(message, "\n".join(units))
-        elif _validUnitCode(unitcode):
-            if unitcode in db:
+                unitCodes = sorted([unitCode for unitCode in db])
+                prefix = unitCodes[0][:3]
+                lines = []
+                for unitCode in unitCodes:
+                    if unitCode[:3] != prefix:
+                        await bot.reply_to(message, "\n".join(lines))
+                        lines = []
+                        prefix = unitCode[:3]
+                    unitName, link = db[unitCode]
+                    lines.append(f"{unitCode} {unitName}")
+                    lines.append(link)
+                    lines.append("")
+                if len(lines) > 0:
+                    await bot.reply_to(message, "\n".join(lines))
+                    lines = []
+            success = True
+        elif _validUnitCode(unitCode):
+            if unitCode in db:
                 success = True
-                unitname, link = db[unitcode]
-                await bot.reply_to(message, f"Click {link} to join {unitcode}: {unitname}")
+                unitName, link = db[unitCode]
+                await bot.reply_to(message, f"Click {link} to join: \n{unitCode} {unitName}")
             else:
-                msg = "No telegram group for unit code {unitcode}"
+                msg = f"no known telegram group for {unitCode}."
         else:
-            msg = "Malformed unit code"
+            msg = f"{unitCode} is a malformed unit code."
         if not success:
-            await bot.reply(message, f"Fail because {msg}")
+            await bot.reply_to(message, f"Fail because {msg}")
 
