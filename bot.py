@@ -58,3 +58,27 @@ def addHandlers(bot: AsyncTeleBot, admins: List[str], db: shelve.Shelf, logger:l
         if not success:
             await bot.reply_to(message, f"Fail because {msg}")
    
+    @bot.message_handler(commands=["rm"])
+    async def remove(message:telebot.types.Message) -> telebot.types.Message:
+        """
+        /rm [unitcode]
+        """
+        sucess = False
+        msg = ""
+        if message.from_user.username in admins:
+            tokens = message.text.split()
+            unitcode = tokens[1].upper()
+            if unitcode[:3].isalpha() and unitcode[3:].isnumeric() and len(unitcode[3:]) == 3:
+                if unitcode in db:
+                    success = True
+                    del db[unitcode]
+                    logger.info(f"{message.from_user.username} removed {unitcode}")
+                    await bot.reply_to(message, f"Success. {unitcode} removed")
+                else:
+                    msg = "No telegram group for unit code {unitcode}"
+            else:
+                msg = "Malformed unit code"
+        else:
+            msg = f"{getName(message)} is Unauthorised user"
+        if not success:
+            await bot.reply(message, f"Fail because {msg}")
