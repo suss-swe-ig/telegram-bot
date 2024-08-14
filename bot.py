@@ -42,20 +42,19 @@ def addHandlers(bot: AsyncTeleBot, admins: List[str], db: shelve.Shelf, logger:l
                         db.sync()
                         success = True
                         logger.info(f"{message.from_user.username} added {unitcode}: {unitname}")
-                        await bot.reply_to(message, f"Success. Added {unitcode}: {unitname}")
+                        await bot.reply_to(message, f"Success. Added {link} for {unitcode}: {unitname}")
                     else:
                         logger.error(f"{message.from_user.username} attempted to add {unitcode} without name")
-                        msg = "Missing unit name"
+                        msg = f"unit name not included for {unitcode}"
                 else:
                     logger.error(f"{message.from_user.username} attempted to add invalid telegram invitation link for {unitcode}")
-                    msg = "Invalid telegram invitation link"
+                    msg = f"Invalid telegram invitation link {link}"
             else:
                 logger.error(f"{message.from_user.username} attempted to add malformed unit code {unitcode}")
-                msg = "Malformed unit code"
+                msg = "Malformed unit code {unitcode}"
         else:
             logger.error(f"Unauthorised user f{getName(message)} attempted to perform {message.text}")
-            msg = "Unauthorised user"
-            await bot.reply_to(message, "Error: Unauthorised user")
+            msg = f"{getName(message)} is Unauthorised user"
         if not success:
             await bot.reply_to(message, f"Fail because {msg}")
    
