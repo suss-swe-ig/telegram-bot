@@ -63,7 +63,7 @@ def addHandlers(bot: AsyncTeleBot, admins: List[str], db: shelve.Shelf, logger:l
         """
         /rm [unitcode]
         """
-        sucess = False
+        success = False
         msg = ""
         if message.from_user.username in admins:
             tokens = message.text.split()
