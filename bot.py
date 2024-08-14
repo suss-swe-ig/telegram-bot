@@ -95,7 +95,7 @@ def addHandlers(bot: AsyncTeleBot, admins: List[str], db: shelve.Shelf, logger:l
         if unitcode[:3].isalpha() and unitcode[3:].isnumeric() and len(unitcode[3:]) == 3:
             if unitcode in db:
                 success = True
-                link, unitname = db[unitcode]
+                unitname, link = db[unitcode]
                 await bot.reply_to(message, f"Click {link} to join {unitcode}: {unitname}")
             else:
                 msg = "No telegram group for unit code {unitcode}"
