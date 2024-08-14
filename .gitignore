@@ -24,3 +24,5 @@ TestResults.xml
 .env
 #python
 __pycache__/*
+#database
+database.db
