@@ -86,13 +86,26 @@ def addHandlers(bot: AsyncTeleBot, admins: List[str], db: shelve.Shelf, logger:l
     @bot.message_handler(commands = ["get"])
     async def get(message:telebot.types.Message) -> telebot.types.Message:
         """
-        /get [unitcode]
+        /get all            return all telegram invitation links
+        /get [unitcode]     return telegram invitation link for a specific unit
         """
         success = False
         msg = ""
         tokens = message.text.split()
         unitcode = tokens[1].upper()
-        if unitcode[:3].isalpha() and unitcode[3:].isnumeric() and len(unitcode[3:]) == 3:
+        if unitcode == "ALL":
+            unitcodes = sorted([key for key in db])
+            prev = unitcodes[0][:3]
+            for u in unitcodes:
+                units = []
+                if prev != u[:3]:
+                    bot.reply_to(message, "\n".join(units))
+                    units = []
+                units.append(" ".join(db[u]))
+                units.append("")
+            if len(units) > 0:
+                bot.reply_to(message, "\n".join(units))
+        elif unitcode[:3].isalpha() and unitcode[3:].isnumeric() and len(unitcode[3:]) == 3:
             if unitcode in db:
                 success = True
                 unitname, link = db[unitcode]
