@@ -11,5 +11,5 @@ if __name__ == "__main__":
         logger.error(e)
         logger.info("suss-telegram-groups bot terminates")
     else:
-        b = bot.Bot(token, admins, logger)
+        b = bot.getBot(token, admins, logger)
         b.infinity_polling()
