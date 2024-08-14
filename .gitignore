@@ -22,3 +22,5 @@ rad.json
 TestResults.xml
 #dot env
 .env
+#python
+__pycache__/*
