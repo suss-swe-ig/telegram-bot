@@ -4,7 +4,6 @@ import telebot
 from telebot.async_telebot import AsyncTeleBot
 import shelve
 import logging
-import asyncio
 
 def setupBot(token:str, admins:List[str], logger:logging.Logger, dbname:str) -> AsyncTeleBot:
     bot = AsyncTeleBot(token)
@@ -29,6 +28,7 @@ def addHandlers(bot: AsyncTeleBot, admins: List[str], db: shelve.Shelf, logger:l
         """
         /add [unitcode] [link] [title]
         """
+        success = False
         if message.from_user.username in admins:
             tokens = message.text.split()
             unitcode = tokens[1].upper()
@@ -39,6 +39,7 @@ def addHandlers(bot: AsyncTeleBot, admins: List[str], db: shelve.Shelf, logger:l
                     if len(unitname) > 0:
                         db[unitcode] = (unitname, link)
                         db.sync()
+                        success = True
                         logger.info(f"{message.from_user.username} added {unitcode}: {unitname}")
                         await bot.reply_to(message, f"Success. Added {unitcode}: {unitname}")
                     else:
@@ -50,7 +51,6 @@ def addHandlers(bot: AsyncTeleBot, admins: List[str], db: shelve.Shelf, logger:l
         else:
             logger.error(f"Unauthorised user f{getName(message)} attempted to perform {message.text}")
             await bot.reply_to(message, "Error: Unauthorised user")
-
-
-
-    
+        if not success:
+            await bot.reply_to(message, f"Fail")
+   
