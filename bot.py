@@ -17,7 +17,7 @@ def getName(message: telebot.types.Message) -> str:
         name = message.from_user.full_name
     return name
 
-def addHandlers(bot: AsyncTeleBot, admins: List[str], db: shelve.Shelf, logger:logging.Logger):
+def addHandlers(bot: AsyncTeleBot, admins: List[str], db: shelve.Shelf, logger:logging.Logger) -> None:
 
     @bot.message_handler(commands=['start','welcome'])
     async def welcome(message:telebot.types.Message) -> telebot.types.Message:
@@ -29,12 +29,13 @@ def addHandlers(bot: AsyncTeleBot, admins: List[str], db: shelve.Shelf, logger:l
         /add [unitcode] [link] [title]
         """
         success = False
+        msg = ""
         if message.from_user.username in admins:
             tokens = message.text.split()
             unitcode = tokens[1].upper()
             unitname = " ".join(tokens[3:])
             link = tokens[2]
-            if unitcode[:3].isalpha() and unitcode[3:].isnumeric():
+            if unitcode[:3].isalpha() and unitcode[3:].isnumeric() and len(unitcode[3:]) == 3:
                 if link.startswith("https://t.me/"):
                     if len(unitname) > 0:
                         db[unitcode] = (unitname, link)
@@ -44,13 +45,17 @@ def addHandlers(bot: AsyncTeleBot, admins: List[str], db: shelve.Shelf, logger:l
                         await bot.reply_to(message, f"Success. Added {unitcode}: {unitname}")
                     else:
                         logger.error(f"{message.from_user.username} attempted to add {unitcode} without name")
+                        msg = "Missing unit name"
                 else:
                     logger.error(f"{message.from_user.username} attempted to add invalid telegram invitation link for {unitcode}")
+                    msg = "Invalid telegram invitation link"
             else:
                 logger.error(f"{message.from_user.username} attempted to add malformed unit code {unitcode}")
+                msg = "Malformed unit code"
         else:
             logger.error(f"Unauthorised user f{getName(message)} attempted to perform {message.text}")
+            msg = "Unauthorised user"
             await bot.reply_to(message, "Error: Unauthorised user")
         if not success:
-            await bot.reply_to(message, f"Fail")
+            await bot.reply_to(message, f"Fail because {msg}")
    
