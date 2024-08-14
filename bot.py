@@ -82,3 +82,25 @@ def addHandlers(bot: AsyncTeleBot, admins: List[str], db: shelve.Shelf, logger:l
             msg = f"{getName(message)} is Unauthorised user"
         if not success:
             await bot.reply(message, f"Fail because {msg}")
+    
+    @bot.message_handler(commands = ["get"])
+    async def get(message:telebot.types.Message) -> telebot.types.Message:
+        """
+        /get [unitcode]
+        """
+        success = False
+        msg = ""
+        tokens = message.text.split()
+        unitcode = tokens[1].upper()
+        if unitcode[:3].isalpha() and unitcode[3:].isnumeric() and len(unitcode[3:]) == 3:
+            if unitcode in db:
+                success = True
+                link, unitname = db[unitcode]
+                await bot.reply_to(message, f"Click {link} to join {unitcode}: {unitname}")
+            else:
+                msg = "No telegram group for unit code {unitcode}"
+        else:
+            msg = "Malformed unit code"
+        if not success:
+            await bot.reply(message, f"Fail because {msg}")
+
