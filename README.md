@@ -6,7 +6,7 @@ You may query this bot to retrieve the telegram invitation link for your unit
 
 ## Configuration
 
-create a .env file with the following content:
+create a .env file in the root directory of the project with the following content:
 
 > TOKEN=[Telegram API Token]  
 > ADMINS=admin1,admin2  
