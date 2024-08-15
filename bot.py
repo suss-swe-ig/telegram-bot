@@ -24,7 +24,7 @@ def _addHandlers(bot: AsyncTeleBot, admins: List[str], db: shelve.Shelf, logger:
 
     @bot.message_handler(commands=['start','welcome'])
     async def welcome(message:telebot.types.Message) -> telebot.types.Message:
-        await bot.reply_to(message, f"hello {message.from_user.full_name}")
+        await bot.reply_to(message, f"hello {message.from_user.full_name}. Enter /help to see what commands are available.")
     
     @bot.message_handler(commands=['admins'])
     async def adminlist(message:telebot.types.Message) -> telebot.types.Message:
