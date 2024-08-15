@@ -140,3 +140,49 @@ def _addHandlers(bot: AsyncTeleBot, admins: List[str], db: shelve.Shelf, logger:
         if not success:
             await bot.reply_to(message, f"Fail because {msg}")
 
+    @bot.message_handler(commands = ["update"])
+    async def update(message:telebot.types.Message) -> telebot.types.Message:
+        """
+        /update [unit code] link [new link]         update the th
+        /update [unit code] name [new unit name]
+        """
+        success = False
+        msg = ""
+        tokens = message.text.split()
+        if len(tokens) < 4:
+            msg = "the update command has missing arguments"
+        else:
+            unitCode = tokens[1].upper()
+            mode = tokens[2].upper()
+            if _validUnitCode(unitCode):
+                if mode == "LINK":
+                    link = tokens[3]
+                    if link.startswith("https://t.me/"):
+                        if unitCode in db:
+                            success = True
+                            unitName, _ = db[unitCode]
+                            db[unitCode] = (unitName, link)
+                            await bot.reply_to(message, f"Success. Updated link for {unitCode}")
+                        else:
+                            msg = f"{unitCode} does not exist in database."
+                    else:
+                        msg = f"invalid telegram invitation link {link} for {unitCode}"
+                elif mode == "NAME":
+                    if unitCode in db:
+                        unitName = " ".join(tokens[3:])
+                        _, link = db[unitCode]
+                        db[unitCode] = (unitName, link)
+                        success = True
+                        await bot.reply_to(message, f"Suuccess. Updated name for {unitCode}")
+                    else:
+                        msg = f"{unitCode} does not exist in database."
+                else:
+                    msg = "update command didn't specify link or name"
+            else:
+                msg = f"{unitCode} is a malformed unit code."
+        if not success:
+            await bot.reply_to(message, f"Fail because {msg}")
+
+    @bot.message_handler(commands = ["help"])
+    async def help(message:telebot.types.Message) -> telebot.types.Message:
+        pass
