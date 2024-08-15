@@ -26,5 +26,3 @@ TestResults.xml
 __pycache__/*
 #database
 database.db
-#virtual environment
-venv/
