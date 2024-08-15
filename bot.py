@@ -147,8 +147,8 @@ def _addHandlers(bot: AsyncTeleBot, admins: List[str], db: shelve.Shelf, logger:
     @bot.message_handler(commands = ["update"])
     async def update(message:telebot.types.Message) -> telebot.types.Message:
         """
-        /update [unit code] link [new link]         update the th
-        /update [unit code] name [new unit name]
+        /update [unit code] link [new link]         update the telegram link for an academic unit
+        /update [unit code] name [new unit name]    update the name of the academic unit
         """
         success = False
         msg = ""
