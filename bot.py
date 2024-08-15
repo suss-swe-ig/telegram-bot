@@ -155,6 +155,9 @@ def _addHandlers(bot: AsyncTeleBot, admins: List[str], db: shelve.Shelf, logger:
         tokens = message.text.split()
         if len(tokens) < 4:
             msg = "the update command has missing arguments"
+        elif message.from_user.username not in admins:
+            msg = f"{message.from_user.username} is not an administrator."
+            logger.error(f"Unauthorised user {_getName(message)} attempted to perform an update.")
         else:
             unitCode = tokens[1].upper()
             mode = tokens[2].upper()
@@ -166,6 +169,7 @@ def _addHandlers(bot: AsyncTeleBot, admins: List[str], db: shelve.Shelf, logger:
                             success = True
                             unitName, _ = db[unitCode]
                             db[unitCode] = (unitName, link)
+                            logger.info(f"{_getName(message)} updated link for {unitCode}")
                             await bot.reply_to(message, f"Success. Updated link for {unitCode}")
                         else:
                             msg = f"{unitCode} does not exist in database."
@@ -177,6 +181,7 @@ def _addHandlers(bot: AsyncTeleBot, admins: List[str], db: shelve.Shelf, logger:
                         _, link = db[unitCode]
                         db[unitCode] = (unitName, link)
                         success = True
+                        logger.info(f"{message.from_user.username} updated name for {unitCode}")
                         await bot.reply_to(message, f"Suuccess. Updated name for {unitCode}")
                     else:
                         msg = f"{unitCode} does not exist in database."
