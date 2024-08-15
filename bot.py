@@ -24,6 +24,10 @@ def _addHandlers(bot: AsyncTeleBot, admins: List[str], db: shelve.Shelf, logger:
 
     @bot.message_handler(commands=['start','welcome'])
     async def welcome(message:telebot.types.Message) -> telebot.types.Message:
+        """
+        /start      Says hi to user
+        /welcome    Says hi to user
+        """
         await bot.reply_to(message, f"hello {message.from_user.full_name}. Enter /help to see what commands are available.")
     
     @bot.message_handler(commands=['admins'])
@@ -185,4 +189,7 @@ def _addHandlers(bot: AsyncTeleBot, admins: List[str], db: shelve.Shelf, logger:
 
     @bot.message_handler(commands = ["help"])
     async def help(message:telebot.types.Message) -> telebot.types.Message:
+        """
+        /help   display all commands available to the user
+        """
         pass
