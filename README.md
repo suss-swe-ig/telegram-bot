@@ -39,9 +39,11 @@ The bot only supports commands in Direct Messaging (DM) mode.
 |---------|-------------|
 | /add [unit code] [link] [unit name] | Add or update the invitation link for given unit. |
 | /rm [unit code] | Remove the invitation link for the given unit. |
-| /dump | Retrieve all telegram invitation into a single message |
 
 ## Feature Backlog
 
-* Broadcast function to share events in telegram groups where the bot joins
-* Reminder function to support the deadlines of each academic unit
+* Refactor the codebase to seperate business logic from lower level implementations.
+* Backup command to dump the database into a downloadable file
+* Restore command to upload the database to the Bot
+* Broadcast command to share events in telegram groups 
+* Reminder command to support the deadlines of each academic unit
