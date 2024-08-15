@@ -9,7 +9,7 @@ You may query this bot to retrieve the telegram invitation link for your unit
 Create a .env file in the root directory of the project with the following content:
 
 > TOKEN=[Telegram API Token]  
-> ADMINS=admin1,admin2,...
+> ADMINS=admin1,admin2,...  
 > DATABASE=[file name for database]  
 
 TOKEN is the Telegram API Token.  
