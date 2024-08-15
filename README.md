@@ -43,7 +43,13 @@ The bot only supports commands in Direct Messaging (DM) mode.
 ## Feature Backlog
 
 * Refactor the codebase to seperate business logic from lower level implementations.
+* Support interaction in main channel or topic.
 * Backup command to dump the database into a downloadable file
 * Restore command to upload the database to the Bot
 * Broadcast command to share events in telegram groups 
 * Reminder command to support the deadlines of each academic unit
+
+## Who do I talk to?
+
+* Email us at suss_swe_ig@outlook.com for feedback
+* If you want to add telegram link to our Bot, contact @geodome on Telegram.
