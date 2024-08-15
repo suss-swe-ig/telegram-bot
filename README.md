@@ -31,7 +31,7 @@ The bot only supports commands in Direct Messaging (DM) mode.
 | /get all  | Retrieve all telegram invitation links  |
 | /get [unit code] | Retrieve the telegram invitation link for the unit | 
 | /admins | Retrieve the list of administrators |
-| /help | Displays the commands available to the user | 
+| /help | Display the commands available to the user | 
 
 ### For admin users
 
