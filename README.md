@@ -37,7 +37,8 @@ The bot only supports commands in Direct Messaging (DM) mode.
 
 | Command | Description |
 |---------|-------------|
-| /add [unit code] [link] [unit name] | Add or update the invitation link for given unit. |
+| /add [unit code] [link] [unit name] | Add the invitation link for given unit. |
+| /update [unit code] [link] | Update the invitation link for the given unit. |
 | /rm [unit code] | Remove the invitation link for the given unit. |
 
 ## Feature Backlog
