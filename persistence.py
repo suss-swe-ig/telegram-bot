@@ -72,7 +72,7 @@ class TelegramGroup:
         return self._unitCode == other.unitCode
     
     def __gt__(self, other:"TelegramGroup") -> bool:
-        return self._unitCode == other.unitCode
+        return self._unitCode > other.unitCode
 
 class Persistence:
     def __init__(self, db: shelve.Shelf):
