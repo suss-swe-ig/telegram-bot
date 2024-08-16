@@ -197,4 +197,22 @@ def _addHandlers(bot: AsyncTeleBot, admins: List[str], db: shelve.Shelf, logger:
         """
         /help   display all commands available to the user
         """
-        pass
+        width = 10
+        if message.from_user.username in admins:
+            width = 40
+        commands = [
+            f"{'command'.center(width)} {'description'.center(width)}",
+            f"{'='*width} {'='*width}",
+            f"{'/start'.ljust(width)} Say hi to the user",
+            f"{'/welcome'.ljust(width)} Say hi to the user",
+            f"{'/get all'.ljust(width)}	Retrieve all telegram invitation links",
+            f"{'/get [unit code]'.ljust(width)} Retrieve the telegram invitation link for the unit",
+            f"{'/admins'.ljust(width)} Retrieve the list of administrators",
+            f"{'/help'.ljust(width)} Display the commands available to the user",
+        ]
+        if message.from_user.username in admins:
+            commands.append(f"{'/add [unit code] [link] [unit name]'.ljust(width)} Add the invitation link for given unit.")
+            commands.append(f"{'/update [unit code] link [new link]'.ljust(width)} Update the invitation link for the given unit.")
+            commands.append(f"{'/update [unit code] name [new name]'.ljust(width)} Update the unit name for the given unit.")
+            commands.append(f"{'/rm [unit code]'.ljust(width)} Remove the invitation link for the given unit.")
+        await bot.reply_to(message, "\n".join(commands))
