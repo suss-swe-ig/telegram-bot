@@ -84,10 +84,13 @@ class Service:
             /update [unit code] name [new unit name]    update the name of the academic unit
             """
             try:
-                await Admin(message.from_user.username, message.from_user.full_name, self._admins, self._db, self._logger, self._telebot).update(message)
+                replies = Admin(message.from_user.username, message.from_user.full_name, self._admins, self._db, self._logger, self._telebot).update(message)
             except NonAdminUserException:
                 self._logger.error(f"Non-admin user {message.from_user.username} attempted to use /update.")
                 await self._telebot.reply_to(message, "Fail. You are not authorised to perform /update.")
+            else:
+                for reply in replies:
+                    await self._bot.reply_to(message, reply)
 
         @self._telebot.message_handler(commands=["rm"])
         async def remove(message:telebot.types.Message) -> None:
