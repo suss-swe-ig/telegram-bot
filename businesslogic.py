@@ -12,7 +12,7 @@ class NonAdminUser(Exception):
 
 class User:
 
-    def __init__(self, username:str, fullname:str, admins:List[str], db:Shelf, logger:Logger, bot:t AsyncTeleBot):
+    def __init__(self, username:str, fullname:str, admins:List[str], db:Shelf, logger:Logger, bot:AsyncTeleBot):
         self._username = username
         self._fullname = fullname
         self._admins = admins
@@ -20,7 +20,7 @@ class User:
         self._logger = logger
         self._bot = bot
 
-    async def welcome(self, bot: telebot.async_telebot.AsyncTeleBot, msg:telebot.types.Message) -> None:
+    async def welcome(self, msg:telebot.types.Message) -> None:
         pass
 
     async def get(self, msg:telebot.types.Message) -> None:
