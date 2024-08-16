@@ -29,7 +29,7 @@ class Service:
             /start      Says hi to user
             /welcome    Says hi to user
             """
-            User(message.from_user.username, message.from_user.full_name, self._admins, self._db, self._logger).welcome(self._telebot, message)
+            await User(message.from_user.username, message.from_user.full_name, self._admins, self._db, self._logger, self._telebot).welcome(message)
 
         @self._telebot.message_handler(commands=['get'])
         async def get(message:telebot.types.Message) -> None:
@@ -37,14 +37,14 @@ class Service:
             /get all            return all telegram invitation links
             /get [unitCode]     return telegram invitation link for a specific unit
             """
-            await User(message.from_user.username, message.from_user.full_name, self._admins, self._db, self._logger).get(self._telebot, message)
+            await User(message.from_user.username, message.from_user.full_name, self._admins, self._db, self._logger, self._telebot).get(message)
 
         @self._telebot.message_handler(commands=['admins'])
         async def adminlist( message:telebot.types.Message) -> None:
             """
             /admins             retrieve the list of administrators
             """
-            User(message.from_user.username, message.from_user.full_name, self._admins, self._db, self._logger).adminlist(self._telebot, message)
+            await User(message.from_user.username, message.from_user.full_name, self._admins, self._db, self._logger, self._telebot).adminlist(message)
         
         @self._telebot.message_handler(commands=["help"])
         async def help(message:telebot.types.Message) -> None:
@@ -52,9 +52,9 @@ class Service:
             /help               displays all available commands to the user
             """
             try:
-                Admin(message.from_user.username, message.from_user.full_name, self._admins, self._db, self._logger).help(self._telebot, message)
+                await Admin(message.from_user.username, message.from_user.full_name, self._admins, self._db, self._logger, self._telebot).help(message)
             except NonAdminUser:
-                User(message.from_user.username, message.from_user.full_name, self._admins, self._db, self._logger).help(self._telebot, message)
+                await User(message.from_user.username, message.from_user.full_name, self._admins, self._db, self._logger, self._telebot).help(message)
             
         @self._telebot.message_handler(commands=["add"])
         async def add(message:telebot.types.Message) -> None:
@@ -62,7 +62,7 @@ class Service:
             /add [unit code] ] [link] [title]       add a telegram group
             """
             try:
-                Admin(message.from_user.username, message.from_user.full_name, self._admins, self._db, self._logger).add(self._telebot, message)
+                await Admin(message.from_user.username, message.from_user.full_name, self._admins, self._db, self._logger, self._telebot).add(message)
             except NonAdminUser:
                 self._logger.error(f"Non-admin user {message.from_user.username} attempted to use /add.")
                 await self._telebot.reply_to(message, "Fail. You are not authorised to perform /add.")
@@ -74,7 +74,7 @@ class Service:
             /update [unit code] name [new unit name]    update the name of the academic unit
             """
             try:
-                Admin(message.from_user.username, message.from_user.full_name, self._admins, self._db, self._logger).update(self._telebot, message)
+                await Admin(message.from_user.username, message.from_user.full_name, self._admins, self._db, self._logger, self._telebot).update(message)
             except NonAdminUser:
                 self._logger.error(f"Non-admin user {message.from_user.username} attempted to use /update.")
                 await self._telebot.reply_to(message, "Fail. You are not authorised to perform /update.")
@@ -85,7 +85,7 @@ class Service:
             /rm [unitCode]      removes a telegram group for that unit code.
             """
             try:
-                Admin(message.from_user.username, message.from_user.full_name, self._admins, self._db, self._logger).remove(self._telebot, message)
+                await Admin(message.from_user.username, message.from_user.full_name, self._admins, self._db, self._logger, self._telebot).remove(message)
             except NonAdminUser:
                 self._logger.error(f"Non-admin user {message.from_user.username} attempted to use /rm.")
                 await self._telebot.reply_to(message, "Fail. You are not authorised to perform /rm.")
