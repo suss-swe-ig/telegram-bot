@@ -102,4 +102,4 @@ class Persistence:
         if not link.startswith("https://t.me/"):
             raise BadTelegramLinkException(unitCode, link)
         self._db[unitCode] = (unitName, link)
-        return TelegramGroup(unitName, unitName, link, self._db)
+        return TelegramGroup(unitCode, unitName, link, self._db)
