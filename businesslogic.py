@@ -9,7 +9,7 @@ import telebot.async_telebot
 from persistence import Persistence, TelegramGroup
 from persistence import MalformedUnitCodeException, NoTelegramGroupException, BadTelegramLinkException
 
-class NonAdminUser(Exception):
+class NonAdminUserException(Exception):
     def __init__(self, username, fullname):
         Exception.__init__(self, f"{username} {fullname} is not an administrator")
 
@@ -84,7 +84,7 @@ class User:
 class Admin(User):
     def __init__(self, username:str, fullname:str, admins:List[str], db:Shelf, logger:Logger, bot: AsyncTeleBot):
         if username not in admins:
-            raise NonAdminUser(username, fullname)
+            raise NonAdminUserException(username, fullname)
         User.__init__(self, username, fullname, admins, db, logger, bot)
 
     def help(self, message:telebot.types.Message) -> None:

@@ -7,7 +7,7 @@ import asyncio
 import telebot
 from telebot.async_telebot import AsyncTeleBot
 
-from businesslogic import User, Admin, NonAdminUser
+from businesslogic import User, Admin, NonAdminUserException
 
 class Service:
 
@@ -57,7 +57,7 @@ class Service:
             """
             try:
                 replies = Admin(message.from_user.username, message.from_user.full_name, self._admins, self._db, self._logger).help(message)
-            except NonAdminUser:
+            except NonAdminUserException:
                 replies = await User(message.from_user.username, message.from_user.full_name, self._admins, self._db, self._logger).help(message)
             finally:
                 for reply in replies:
@@ -70,7 +70,7 @@ class Service:
             """
             try:
                 replies = Admin(message.from_user.username, message.from_user.full_name, self._admins, self._db, self._logger).add(message)
-            except NonAdminUser:
+            except NonAdminUserException:
                 self._logger.error(f"Non-admin user {message.from_user.username} attempted to use /add.")
                 await self._telebot.reply_to(message, "Fail. You are not authorised to perform /add.")
             else:
@@ -85,7 +85,7 @@ class Service:
             """
             try:
                 await Admin(message.from_user.username, message.from_user.full_name, self._admins, self._db, self._logger, self._telebot).update(message)
-            except NonAdminUser:
+            except NonAdminUserException:
                 self._logger.error(f"Non-admin user {message.from_user.username} attempted to use /update.")
                 await self._telebot.reply_to(message, "Fail. You are not authorised to perform /update.")
 
@@ -96,7 +96,7 @@ class Service:
             """
             try:
                 replies = Admin(message.from_user.username, message.from_user.full_name, self._admins, self._db, self._logger).remove(message)
-            except NonAdminUser:
+            except NonAdminUserException:
                 self._logger.error(f"Non-admin user {message.from_user.username} attempted to use /rm.")
                 await self._telebot.reply_to(message, "Fail. You are not authorised to perform /rm.")
             else:
