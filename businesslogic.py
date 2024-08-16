@@ -6,8 +6,6 @@ import telebot
 from telebot.async_telebot import AsyncTeleBot
 import telebot.async_telebot
 
-import persistence
-
 class User:
 
     def __init__(username:str, fullname:str, admins:List[str], db:Shelf, logger:Logger):
@@ -25,9 +23,9 @@ class User:
     async def help(self, bot: telebot.async_telebot.AsyncTeleBot, msg:telebot.types.Message) -> None:
         pass
 
-class Admin:
+class Admin(User):
 
-    def __init__(username:str, fullname:str, admins:List[str], db:Shelf, logger:Logger):
+    async def help(self, bot: telebot.async_telebot.AsyncTeleBot, msg:telebot.types.Message) -> None:
         pass
 
     async def add(self, bot: telebot.async_telebot.AsyncTeleBot, msg:telebot.types.Message) -> None:
