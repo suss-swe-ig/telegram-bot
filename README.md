@@ -42,6 +42,13 @@ The bot only supports commands in Direct Messaging (DM) mode.
 | /update [unit code] name [new name] | Update the unit name for the given unit. |
 | /rm [unit code] | Remove the invitation link for the given unit. |
 
+## Software Architecture
+
+* 3-layered architecutre
+* Top-most layer is Service Layer which interacts with the Internet directly
+* 2nd layer is Business Logic Layer
+* 3rd layer is Data Persistence Layer
+
 ## Feature Backlog
 
 * Refactor the codebase to seperate business logic from lower level implementations.
