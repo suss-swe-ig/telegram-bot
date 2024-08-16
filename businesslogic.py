@@ -7,12 +7,12 @@ from telebot.async_telebot import AsyncTeleBot
 import telebot.async_telebot
 
 from persistence import Persistence, TelegramGroup, MalformedUnitCodeException, NoTelegramGroupException
+
 class NonAdminUser(Exception):
     def __init__(self, username, fullname):
         Exception.__init__(self, f"{username} {fullname} is not an administrator")
 
 class User:
-
     def __init__(self, username:str, fullname:str, admins:List[str], db:Shelf, logger:Logger):
         self._username = username
         self._fullname = fullname
@@ -67,8 +67,7 @@ class User:
         msg = "Contact an administrator to add or remove a telegram chat group. \n\n" + msg
         return [msg]
 
-    def help(self, message:telebot.types.Message) -> List[str]:
-        width = 10
+    def help(self, message:telebot.types.Message, width=10) -> List[str]:
         commands = [
             f"{'command'.center(width)} {'description'.center(width)}",
             f"{'='*width} {'='*width}",
@@ -82,7 +81,6 @@ class User:
         return ["\n".join(commands)]
 
 class Admin(User):
-
     def __init__(self, username:str, fullname:str, admins:List[str], db:Shelf, logger:Logger, bot: AsyncTeleBot):
         if username not in admins:
             raise NonAdminUser(username, fullname)
@@ -90,7 +88,7 @@ class Admin(User):
 
     def help(self, message:telebot.types.Message) -> None:
         width = 40
-        replies = User.help(self, message)
+        replies = User.help(self, message, width)
         commands = [
             f"{'/add [unit code] [link] [unit name]'.ljust(width)} Add the invitation link for given unit.",
             f"{'/update [unit code] link [new link]'.ljust(width)} Update the invitation link for the given unit.",
@@ -100,12 +98,11 @@ class Admin(User):
         replies.append("\n".join(commands))
         return replies
 
-
-    async def add(self, msg:telebot.types.Message) -> None:
+    def add(self, msg:telebot.types.Message) -> List[str]:
         pass
 
-    async def update(self, msg:telebot.types.Message) -> None:
+    def update(self, msg:telebot.types.Message) -> List[str]:
         pass
 
-    async def remove(self, msg:telebot.types.Message) -> None:
+    def remove(self, msg:telebot.types.Message) -> List[str]:
         pass

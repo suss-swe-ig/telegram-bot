@@ -14,7 +14,6 @@ class NoTelegramGroupException(Exception):
         Exception.__init__(self, f"No known telegram group for {unitCode}")
 
 class TelegramGroup:
-
     def __init__(self, unitCode:str, unitName:str, link:str, db:shelve.Shelf) -> None:
         self._unitCode = unitCode.upper()
         self._unitName = unitName
