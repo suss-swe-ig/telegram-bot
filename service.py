@@ -37,14 +37,18 @@ class Service:
             /get all            return all telegram invitation links
             /get [unitCode]     return telegram invitation link for a specific unit
             """
-            await User(message.from_user.username, message.from_user.full_name, self._admins, self._db, self._logger, self._telebot).get(message)
+            replies = User(message.from_user.username, message.from_user.full_name, self._admins, self._db, self._logger).get(message)
+            for reply in replies:
+                await self._bot.reply_to(message, reply)
 
         @self._telebot.message_handler(commands=['admins'])
         async def adminlist( message:telebot.types.Message) -> None:
             """
             /admins             retrieve the list of administrators
             """
-            await User(message.from_user.username, message.from_user.full_name, self._admins, self._db, self._logger, self._telebot).adminlist(message)
+            replies = User(message.from_user.username, message.from_user.full_name, self._admins, self._db, self._logger).adminlist(message)
+            for reply in replies:
+                await self._bot.reply_to(message, reply)
         
         @self._telebot.message_handler(commands=["help"])
         async def help(message:telebot.types.Message) -> None:
@@ -52,20 +56,26 @@ class Service:
             /help               displays all available commands to the user
             """
             try:
-                await Admin(message.from_user.username, message.from_user.full_name, self._admins, self._db, self._logger, self._telebot).help(message)
+                replies = Admin(message.from_user.username, message.from_user.full_name, self._admins, self._db, self._logger).help(message)
             except NonAdminUser:
-                await User(message.from_user.username, message.from_user.full_name, self._admins, self._db, self._logger, self._telebot).help(message)
-            
+                replies = await User(message.from_user.username, message.from_user.full_name, self._admins, self._db, self._logger).help(message)
+            finally:
+                for reply in replies:
+                    await self._bot.reply_to(message, reply)
+
         @self._telebot.message_handler(commands=["add"])
         async def add(message:telebot.types.Message) -> None:
             """
             /add [unit code] ] [link] [title]       add a telegram group
             """
             try:
-                await Admin(message.from_user.username, message.from_user.full_name, self._admins, self._db, self._logger, self._telebot).add(message)
+                replies = Admin(message.from_user.username, message.from_user.full_name, self._admins, self._db, self._logger).add(message)
             except NonAdminUser:
                 self._logger.error(f"Non-admin user {message.from_user.username} attempted to use /add.")
                 await self._telebot.reply_to(message, "Fail. You are not authorised to perform /add.")
+            else:
+                for reply in replies:
+                    await self._bot.reply_to(message, reply)
 
         @self._telebot.message_handler(commands=["update"])
         async def update(message:telebot.types.Message) -> None:
@@ -85,8 +95,11 @@ class Service:
             /rm [unitCode]      removes a telegram group for that unit code.
             """
             try:
-                await Admin(message.from_user.username, message.from_user.full_name, self._admins, self._db, self._logger, self._telebot).remove(message)
+                replies = Admin(message.from_user.username, message.from_user.full_name, self._admins, self._db, self._logger).remove(message)
             except NonAdminUser:
                 self._logger.error(f"Non-admin user {message.from_user.username} attempted to use /rm.")
                 await self._telebot.reply_to(message, "Fail. You are not authorised to perform /rm.")
+            else:
+                for reply in replies:
+                    await self._bot.reply_to(message, reply)
 
