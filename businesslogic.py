@@ -55,7 +55,7 @@ class User:
             try:
                 tg = self._persistence.getTelegramGroup(unitCode)
             except MalformedUnitCodeException:
-                return ["Fail because {unitCode} is a malformed unit code,"]
+                return [f"Fail because {unitCode} is a malformed unit code,"]
             except NoTelegramGroupException:
                 return [f"Fail because no known telegram group for {unitCode}"]
             else:
@@ -108,10 +108,10 @@ class Admin(User):
             self._persistence.addTelegramGroup(unitCode, unitName, link)
         except MalformedUnitCodeException:
             self._logger.error(f"{self._username} added a telegram group with a malformed unit code.")
-            return ["Fail because unit code {unitCode} is malformed."]
+            return [f"Fail because unit code {unitCode} is malformed."]
         except BadTelegramLinkException:
             self._logger.error(f"{self._username} added a telegram group with a bad telegram link.")
-            return ["Fail because bad telegram link {link} was given for {unitCode}"]
+            return [f"Fail because bad telegram link {link} was given for {unitCode}"]
 
     def update(self, msg:telebot.types.Message) -> List[str]:
         pass
