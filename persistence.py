@@ -10,8 +10,16 @@ class MalformedUnitCodeException(Exception):
         Exception.__init__(self, f"{unitCode} is a malformed unit code")
 
 class NoTelegramGroupException(Exception):
-    def __init__(self, unitCode:str):
+    def __init__(self, unitCode:str) -> None:
         Exception.__init__(self, f"No known telegram group for {unitCode}")
+
+class BadTelegramLinkException(Exception):
+    def __init__(self, unitCode:str, link:str) -> None:
+        Exception.__init__(self, f"Bad link {link} given for {unitCode}")
+
+class BadUnitNameException(Exception):
+    def __init__(self, unitCode:str):
+        Exception.__init__(self, f"Bad Unit Name for {unitCode}")
 
 class TelegramGroup:
     def __init__(self, unitCode:str, unitName:str, link:str, db:shelve.Shelf) -> None:
@@ -19,6 +27,27 @@ class TelegramGroup:
         self._unitName = unitName
         self._link = link
         self._db = db
+    
+    def updateUnitName(self, unitName:str) -> None:
+        if len(unitName) == 0:
+            raise BadUnitNameException(self._unitCode)
+        try:
+            _, link = self._db[self._unitCode] 
+        except KeyError:
+            raise NoTelegramGroupException(self._unitCode)
+        else:
+            self._db[self._unitCode] = (unitName, link)
+            self._unitName = unitName
+
+    def updateLink(self, link:str) -> None:
+        if not link.startswith("https://t.me/"):
+            raise BadTelegramLinkException(self._unitCode, link)
+        try:
+            unitName, _ = self._db[self._unitCode]
+        except KeyError:
+            raise NoTelegramGroupException(self._unitCode)
+        else:
+            self._db[self._unitCode] = (unitName, link)
 
     @property
     def unitCode(self) -> str:
@@ -67,3 +96,10 @@ class Persistence:
             tgs.append(TelegramGroup(unitCode, unitName, link, self._db))
         return tgs
     
+    def addTelegramGroup(self, unitCode:str, unitName:str, link:str) -> TelegramGroup:
+        if not _validUnitCode(unitCode):
+            raise MalformedUnitCodeException(unitCode)
+        if not link.startswith("https://t.me/"):
+            raise BadTelegramLinkException(unitCode, link)
+        self._db[unitCode] = (unitName, link)
+        return TelegramGroup(unitName, unitName, link, self._db)
