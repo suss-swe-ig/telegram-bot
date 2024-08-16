@@ -6,7 +6,8 @@ import telebot
 from telebot.async_telebot import AsyncTeleBot
 import telebot.async_telebot
 
-from persistence import Persistence, TelegramGroup, MalformedUnitCodeException, NoTelegramGroupException
+from persistence import Persistence, TelegramGroup
+from persistence import MalformedUnitCodeException, NoTelegramGroupException, BadTelegramLinkException
 
 class NonAdminUser(Exception):
     def __init__(self, username, fullname):
@@ -98,8 +99,19 @@ class Admin(User):
         replies.append("\n".join(commands))
         return replies
 
-    def add(self, msg:telebot.types.Message) -> List[str]:
-        pass
+    def add(self, message:telebot.types.Message) -> List[str]:
+        tokens = message.text.split()
+        unitCode = tokens[1].upper()
+        link = tokens[2]
+        unitName = " ".join(tokens[3:])
+        try:
+            self._persistence.addTelegramGroup(unitCode, unitName, link)
+        except MalformedUnitCodeException:
+            self._logger.error(f"{self._username} added a telegram group with a malformed unit code.")
+            return ["Fail because unit code {unitCode} is malformed."]
+        except BadTelegramLinkException:
+            self._logger.error(f"{self._username} added a telegram group with a bad telegram link.")
+            return ["Fail because bad telegram link {link} was given for {unitCode}"]
 
     def update(self, msg:telebot.types.Message) -> List[str]:
         pass
