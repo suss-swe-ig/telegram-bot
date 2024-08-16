@@ -6,31 +6,80 @@ import telebot
 from telebot.async_telebot import AsyncTeleBot
 import telebot.async_telebot
 
+from persistence import Persistence, TelegramGroup, MalformedUnitCodeException, NoTelegramGroupException
 class NonAdminUser(Exception):
     def __init__(self, username, fullname):
         Exception.__init__(self, f"{username} {fullname} is not an administrator")
 
 class User:
 
-    def __init__(self, username:str, fullname:str, admins:List[str], db:Shelf, logger:Logger, bot:AsyncTeleBot):
+    def __init__(self, username:str, fullname:str, admins:List[str], db:Shelf, logger:Logger):
         self._username = username
         self._fullname = fullname
         self._admins = admins
-        self._db = db
+        self._persistence = Persistence(db)
         self._logger = logger
-        self._bot = bot
+    
+    def isAdmin(self) -> bool:
+        return self._username in self._admins
 
-    async def welcome(self, msg:telebot.types.Message) -> None:
-        pass
+    def welcome(self, message:telebot.types.Message) -> List[str]:
+        return [f"hello {message.from_user.full_name}. Enter /help to see what commands are available."]
 
-    async def get(self, msg:telebot.types.Message) -> None:
-        pass
+    def get(self, message:telebot.types.Message) -> List[str]:
+        tokens = message.text.split()
+        unitCode = tokens[1].upper()
+        if unitCode == "ALL":
+            unitCodes = sorted(self._persistence.getUnitCodes())
+            if len(unitCodes) == 0:
+                return ["No telegram groups available."]
+            else:
+                tgs = sorted(self._persistence.getTelegramGroups())
+                prefix = tgs[0].prefix
+                lines = []
+                replies = []
+                for tg in tgs:
+                    if tg.prefix != prefix:
+                        replies.append("\n".join(lines))
+                        lines = []
+                        prefix = tg.prefix
+                    lines.append(f"{tg,unitCode} {tg.unitName}")
+                    lines.append(tg.link)
+                    lines.append("")
+                if len(lines) > 0:
+                    replies.append("\n".join(lines))
+                    lines = []
+                return replies
+        else:
+            try:
+                tg = self._persistence.getTelegramGroup(unitCode)
+            except MalformedUnitCodeException:
+                return ["Fail because {unitCode} is a malformed unit code,"]
+            except NoTelegramGroupException:
+                return [f"Fail because no known telegram group for {unitCode}"]
+            else:
+                return [f"Click {tg.link} to join {tg.unitCode} {tg.unitName}"]
 
-    async def adminlist(self, msg:telebot.types.Message) -> None:
-        pass
+    def adminlist(self, message:telebot.types.Message) -> List[str]:
+        msg = f"The administrator is @{self._admins[0]}"
+        if len(self._admins) > 1:
+            msg = f"The administrators are {", ".join(["@" + admin for admin in self._admins])}."
+        msg = "Contact an administrator to add or remove a telegram chat group. \n\n" + msg
+        return [msg]
 
-    async def help(self, msg:telebot.types.Message) -> None:
-        pass
+    def help(self, message:telebot.types.Message) -> List[str]:
+        width = 10
+        commands = [
+            f"{'command'.center(width)} {'description'.center(width)}",
+            f"{'='*width} {'='*width}",
+            f"{'/start'.ljust(width)} Say hi to the user",
+            f"{'/welcome'.ljust(width)} Say hi to the user",
+            f"{'/get all'.ljust(width)}	Retrieve all telegram invitation links",
+            f"{'/get [unit code]'.ljust(width)} Retrieve the telegram invitation link for the unit",
+            f"{'/admins'.ljust(width)} Retrieve the list of administrators",
+            f"{'/help'.ljust(width)} Display the commands available to the user",
+        ]
+        return ["\n".join(commands)]
 
 class Admin(User):
 
@@ -39,8 +88,18 @@ class Admin(User):
             raise NonAdminUser(username, fullname)
         User.__init__(self, username, fullname, admins, db, logger, bot)
 
-    async def help(self, msg:telebot.types.Message) -> None:
-        pass
+    def help(self, message:telebot.types.Message) -> None:
+        width = 40
+        replies = User.help(self, message)
+        commands = [
+            f"{'/add [unit code] [link] [unit name]'.ljust(width)} Add the invitation link for given unit.",
+            f"{'/update [unit code] link [new link]'.ljust(width)} Update the invitation link for the given unit.",
+            f"{'/update [unit code] name [new name]'.ljust(width)} Update the unit name for the given unit.",
+            f"{'/rm [unit code]'.ljust(width)} Remove the invitation link for the given unit.",
+        ]
+        replies.append("\n".join(commands))
+        return replies
+
 
     async def add(self, msg:telebot.types.Message) -> None:
         pass
