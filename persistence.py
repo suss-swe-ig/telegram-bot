@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Tuple
 
 import shelve
 
@@ -22,13 +22,16 @@ class BadUnitNameException(Exception):
         Exception.__init__(self, f"Bad Unit Name for {unitCode}")
 
 class TelegramGroup:
-    def __init__(self, unitCode:str, unitName:str, link:str, db:shelve.Shelf) -> None:
+    def __init__(self, unitCode:str, unitName:str, link:str, p:"Persistence") -> None:
         self._unitCode = unitCode.upper()
         self._unitName = unitName
         self._link = link
-        self._db = db
+        self._p = p
+        self._deleted = False
     
     def updateUnitName(self, unitName:str) -> None:
+        if self._deleted:
+            raise NoTelegramGroupException(self._unitCode)
         if len(unitName) == 0:
             raise BadUnitNameException(self._unitCode)
         try:
@@ -40,6 +43,8 @@ class TelegramGroup:
             self._unitName = unitName
 
     def updateLink(self, link:str) -> None:
+        if self._deleted:
+            raise NoTelegramGroupException(self._unitCode)
         if not link.startswith("https://t.me/"):
             raise BadTelegramLinkException(self._unitCode, link)
         try:
@@ -73,6 +78,11 @@ class TelegramGroup:
     
     def __gt__(self, other:"TelegramGroup") -> bool:
         return self._unitCode > other.unitCode
+    
+    def __del__(self):
+        if not self._deleted:
+            self._deleted = True
+            self._p.deleteTelegramGroup(self) 
 
 class Persistence:
     def __init__(self, db: shelve.Shelf):
@@ -93,7 +103,7 @@ class Persistence:
         tgs = []
         for unitCode in self._db:
             unitName, link = self._db[unitCode]
-            tgs.append(TelegramGroup(unitCode, unitName, link, self._db))
+            tgs.append(TelegramGroup(unitCode, unitName, link, self))
         return tgs
     
     def addTelegramGroup(self, unitCode:str, unitName:str, link:str) -> TelegramGroup:
@@ -101,5 +111,23 @@ class Persistence:
             raise MalformedUnitCodeException(unitCode)
         if not link.startswith("https://t.me/"):
             raise BadTelegramLinkException(unitCode, link)
+        if len(unitName) == 0:
+            raise BadUnitNameException(unitCode)
         self._db[unitCode] = (unitName, link)
-        return TelegramGroup(unitCode, unitName, link, self._db)
+        return TelegramGroup(unitCode, unitName, link, self)
+    
+    def __getitem__(self, unitCode:str):
+        if unitCode in self._db:
+            return self._db[unitCode]
+        raise KeyError()
+    
+    def __setitem__(self, unitCode:str, values:Tuple[str,str]):
+        self._db[unitCode] = values
+    
+    def deleteTelegramGroup(self, tg: TelegramGroup) -> bool:
+        try:
+            del self._db[tg.unitCode]
+        except KeyError:
+            return False
+        else:
+            return True
