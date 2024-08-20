@@ -87,8 +87,8 @@ class TelegramGroup:
             self._p.deleteTelegramGroup(self) 
 
 class Persistence(Singleton):
-    def __init__(self, db: shelve.Shelf):
-        self._db = db
+    def __init__(self, dbname:str):
+        self._db = shelve.open(dbname)
     
     def getTelegramGroup(self, unitCode:str) -> TelegramGroup:
         if _validUnitCode(unitCode):

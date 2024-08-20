@@ -1,9 +1,10 @@
-import asyncio
 import logging 
 import shelve
 
 import config
 import service
+
+from persistence import Persistence
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
@@ -15,6 +16,6 @@ if __name__ == "__main__":
         logger.info("suss-telegram-groups bot terminates")
     else:
         logger.info("suss-telegram-groups bot starts")
-        database = shelve.open(dbname)
+        database = Persistence(dbname)
         svc = service.Service(token, admins, logger, database)
         svc.run()
