@@ -7,9 +7,10 @@ import asyncio
 import telebot
 from telebot.async_telebot import AsyncTeleBot
 
+from singleton import Singleton
 from businesslogic import User, Admin, NonAdminUserException
 
-class Service:
+class Service(Singleton):
 
     def __init__(self, token:str, admins:List[str], logger:logging.Logger, database:shelve.Shelf) -> None:
         self._token = token

@@ -2,6 +2,8 @@ from typing import List, Tuple
 
 import shelve
 
+from singleton import Singleton
+
 def _validUnitCode(unitCode:str) -> bool:
     return len(unitCode) == 6 and unitCode[:3].isalpha() and unitCode[3:].isnumeric()
 
@@ -84,7 +86,7 @@ class TelegramGroup:
             self._deleted = True
             self._p.deleteTelegramGroup(self) 
 
-class Persistence:
+class Persistence(Singleton):
     def __init__(self, db: shelve.Shelf):
         self._db = db
     
