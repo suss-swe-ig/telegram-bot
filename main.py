@@ -4,7 +4,7 @@ import shelve
 import config
 import service
 
-from persistence import Persistence
+import persistence
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
@@ -16,6 +16,6 @@ if __name__ == "__main__":
         logger.info("suss-telegram-groups bot terminates")
     else:
         logger.info("suss-telegram-groups bot starts")
-        database = Persistence(dbname)
-        svc = service.Service(token, admins, logger, database)
-        svc.run()
+        persistence.setup(dbname, admins)
+        service.setup(token, logger)
+        service.run()
