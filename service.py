@@ -14,7 +14,7 @@ _SERVICE = None
 
 def setup(token:str, logger:logging.Logger):
     global _SERVICE
-    _SERVICE = Service(token, logger)
+    _SERVICE = SingletonService(token, logger)
 
 class ServiceNotReadyException(Exception):
     pass
@@ -25,7 +25,7 @@ def run():
         raise ServiceNotReadyException()
     _SERVICE.run()
     
-class Service(Singleton):
+class SingletonService(Singleton):
 
     def __init__(self, token:str, logger:logging.Logger) -> None:
         self._token = token
