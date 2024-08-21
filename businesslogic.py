@@ -6,7 +6,7 @@ import telebot
 from telebot.async_telebot import AsyncTeleBot
 import telebot.async_telebot
 
-from persistence import Persistence, TelegramGroup
+from persistence import getDatabase, TelegramGroup
 from persistence import MalformedUnitCodeException, NoTelegramGroupException, BadTelegramLinkException
 
 class NonAdminUserException(Exception):
@@ -14,28 +14,31 @@ class NonAdminUserException(Exception):
         Exception.__init__(self, f"{username} {fullname} is not an administrator")
 
 class User:
-    def __init__(self, username:str, fullname:str, admins:List[str], db:Shelf, logger:Logger):
+    def __init__(self, username:str, fullname:str, logger:Logger):
         self._username = username
         self._fullname = fullname
-        self._admins = admins
-        self._persistence = Persistence(db)
+        self._db = getDatabase()
         self._logger = logger
     
     def isAdmin(self) -> bool:
-        return self._username in self._admins
+        return self._username in self._db.getAdmins()
 
     def welcome(self, message:telebot.types.Message) -> List[str]:
-        return [f"hello {message.from_user.full_name}. Enter /help to see what commands are available."]
+        return ["\n".join([
+            f"hello {message.from_user.full_name},"
+            "",
+            "",
+            "Enter /help to see what commands are available."
+        ])]
 
     def get(self, message:telebot.types.Message) -> List[str]:
         tokens = message.text.split()
         unitCode = tokens[1].upper()
         if unitCode == "ALL":
-            unitCodes = sorted(self._persistence.getUnitCodes())
-            if len(unitCodes) == 0:
+            tgs = sorted(self._db.getTelegramGroups())
+            if len(tgs) == 0:
                 return ["No telegram groups available."]
             else:
-                tgs = sorted(self._persistence.getTelegramGroups())
                 prefix = tgs[0].prefix
                 lines = []
                 replies = []
@@ -44,7 +47,7 @@ class User:
                         replies.append("\n".join(lines))
                         lines = []
                         prefix = tg.prefix
-                    lines.append(f"{tg,unitCode} {tg.unitName}")
+                    lines.append(f"{tg.unitCode} {tg.unitName}")
                     lines.append(tg.link)
                     lines.append("")
                 if len(lines) > 0:
@@ -53,7 +56,7 @@ class User:
                 return replies
         else:
             try:
-                tg = self._persistence.getTelegramGroup(unitCode)
+                tg = self._db.getTelegramGroup(unitCode)
             except MalformedUnitCodeException:
                 return [f"Fail because {unitCode} is a malformed unit code,"]
             except NoTelegramGroupException:
@@ -62,42 +65,59 @@ class User:
                 return [f"Click {tg.link} to join {tg.unitCode} {tg.unitName}"]
 
     def adminlist(self, message:telebot.types.Message) -> List[str]:
-        msg = f"The administrator is @{self._admins[0]}"
-        if len(self._admins) > 1:
-            msg = f"The administrators are {", ".join(["@" + admin for admin in self._admins])}."
+        admins = self._db.getAdmins()
+        msg = f"The administrator is @{admins[0]}"
+        if len(admins) > 1:
+            msg = f"The administrators are {", ".join(["@" + admin for admin in admins])}."
         msg = "Contact an administrator to add or remove a telegram chat group. \n\n" + msg
         return [msg]
 
     def help(self, message:telebot.types.Message, width=10) -> List[str]:
         commands = [
-            f"{'command'.center(width)} {'description'.center(width)}",
-            f"{'='*width} {'='*width}",
-            f"{'/start'.ljust(width)} Say hi to the user",
-            f"{'/welcome'.ljust(width)} Say hi to the user",
-            f"{'/get all'.ljust(width)}	Retrieve all telegram invitation links",
-            f"{'/get [unit code]'.ljust(width)} Retrieve the telegram invitation link for the unit",
-            f"{'/admins'.ljust(width)} Retrieve the list of administrators",
-            f"{'/help'.ljust(width)} Display the commands available to the user",
+            "/start",
+            "Say hi to the user",
+            "",
+            "/welcome",
+            "Say hi to the user",
+            "",
+            "/get all",
+            "Retrieve all telegram invitation links",
+            "",
+            "/get [unit code]",
+            "Retrieve the telegram invitation link for the unit",
+            "",
+            "/admins",
+            "Retrieve the list of administrators",
+            "",
+            "/help", 
+            "Display the commands available to the user",
+            "",
         ]
         return ["\n".join(commands)]
 
 class Admin(User):
-    def __init__(self, username:str, fullname:str, admins:List[str], db:Shelf, logger:Logger, bot: AsyncTeleBot):
-        if username not in admins:
+    def __init__(self, username:str, fullname:str, logger:Logger):
+        User.__init__(self, username, fullname, logger)
+        if username not in getDatabase().getAdmins():
             raise NonAdminUserException(username, fullname)
-        User.__init__(self, username, fullname, admins, db, logger, bot)
 
-    def help(self, message:telebot.types.Message) -> None:
-        width = 40
-        replies = User.help(self, message, width)
+    def help(self, message:telebot.types.Message) -> List[str]:
         commands = [
-            f"{'/add [unit code] [link] [unit name]'.ljust(width)} Add the invitation link for given unit.",
-            f"{'/update [unit code] link [new link]'.ljust(width)} Update the invitation link for the given unit.",
-            f"{'/update [unit code] name [new name]'.ljust(width)} Update the unit name for the given unit.",
-            f"{'/rm [unit code]'.ljust(width)} Remove the invitation link for the given unit.",
+            "/add [unit code] [link] [unit name]",
+            "Add the invitation link for given unit.",
+            "",
+            "/update [unit code] link [new link]", 
+            "Update the invitation link for the given unit.",
+            "",
+            "/update [unit code] name [new name]", 
+            "Update the unit name for the given unit.",
+            "",
+            "/rm [unit code]", 
+            "Remove the invitation link for the given unit.",
+            "",
         ]
-        replies.append("\n".join(commands))
-        return replies
+        return ["\n".join(commands)]
+        
 
     def add(self, message:telebot.types.Message) -> List[str]:
         tokens = message.text.split()
@@ -105,16 +125,29 @@ class Admin(User):
         link = tokens[2]
         unitName = " ".join(tokens[3:])
         try:
-            self._persistence.addTelegramGroup(unitCode, unitName, link)
+            self._db.addTelegramGroup(unitCode, unitName, link)
         except MalformedUnitCodeException:
             self._logger.error(f"{self._username} added a telegram group with a malformed unit code.")
             return [f"Fail because unit code {unitCode} is malformed."]
         except BadTelegramLinkException:
             self._logger.error(f"{self._username} added a telegram group with a bad telegram link.")
             return [f"Fail because bad telegram link {link} was given for {unitCode}"]
+        else:
+            return [f"Success. {unitCode} {unitName} added"]
 
     def update(self, msg:telebot.types.Message) -> List[str]:
-        pass
+        return [f"Not Implemented"]
 
-    def remove(self, msg:telebot.types.Message) -> List[str]:
-        pass
+    def remove(self, message:telebot.types.Message) -> List[str]:
+        tokens = message.text.split()
+        unitCode = tokens[1].upper()
+        try:
+            tg = self._db.getTelegramGroup(unitCode)
+        except NoTelegramGroupException:
+            self._logger.info(f"{self._username} attempted to remove non existent Telegram Group for {unitCode}")
+            return [f"Fail because no known Telegram Group for {unitCode}"]
+        except MalformedUnitCodeException:
+            return [f"Fail because {unitCode} is a malformed unit code."]
+        else:
+            tg.delete()
+            return [f"Success. Telegram group for {unitCode} is deleted."]
