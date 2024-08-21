@@ -56,7 +56,7 @@ The bot only supports commands in Direct Messaging (DM) mode.
 ## Software Architecure
 ![hello world](architecture.png)
 
-The Service Layer is responsible for handling interactions with the Telegram API Server.  
+The Service Layer is responsible for handling interactions with the Telegram API Server. The SingletonService class interacts with the Telegram API Server via the AsyncTelebot class.  
 
 The Busines Logic Layer consists of Admin Class and User class that provides authentication and authorisation for specific commands. These 2 classes also execute the logic of these commands.  
 
