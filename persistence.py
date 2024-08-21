@@ -4,7 +4,7 @@ import shelve
 
 from singleton import Singleton
 
-_DATABASE: "Database" = None
+_DATABASE: "SingletonDatabase" = None
 
 def setup(dbname:str, admins:List[str]) -> None:
     global _DATABASE
