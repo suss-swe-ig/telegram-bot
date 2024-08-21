@@ -4,6 +4,21 @@ import shelve
 
 from singleton import Singleton
 
+_DATABASE = None
+
+def setup(dbname:str, admins:List[str]) -> None:
+    global _DATABASE
+    _DATABASE = Database(dbname, admins)
+
+class DatabaseNotReadyException(Exception):
+    pass
+
+def getDatabase() -> "Database":
+    global _DATABASE
+    if _DATABASE is None:
+        raise DatabaseNotReadyException()
+    return _DATABASE
+
 def _validUnitCode(unitCode:str) -> bool:
     return len(unitCode) == 6 and unitCode[:3].isalpha() and unitCode[3:].isnumeric()
 
@@ -24,11 +39,11 @@ class BadUnitNameException(Exception):
         Exception.__init__(self, f"Bad Unit Name for {unitCode}")
 
 class TelegramGroup:
-    def __init__(self, unitCode:str, unitName:str, link:str, p:"Persistence") -> None:
+    def __init__(self, unitCode:str, unitName:str, link:str) -> None:
         self._unitCode = unitCode.upper()
         self._unitName = unitName
         self._link = link
-        self._p = p
+        self._db = getDatabase()
         self._deleted = False
     
     def updateUnitName(self, unitName:str) -> None:
@@ -56,6 +71,14 @@ class TelegramGroup:
         else:
             self._db[self._unitCode] = (unitName, link)
 
+    def delete(self):
+        try:
+            self._db.deleteTelegramGroup(self)
+        except NoTelegramGroupException as e:
+            raise e
+        else:
+            self._deleted = True
+
     @property
     def unitCode(self) -> str:
         return self._unitCode
@@ -80,32 +103,30 @@ class TelegramGroup:
     
     def __gt__(self, other:"TelegramGroup") -> bool:
         return self._unitCode > other.unitCode
-    
-    def __del__(self):
-        if not self._deleted:
-            self._deleted = True
-            self._p.deleteTelegramGroup(self) 
 
-class Persistence(Singleton):
-    def __init__(self, dbname:str):
+class Database(Singleton):
+    def __init__(self, dbname:str, admins:List[str]):
         self._db = shelve.open(dbname)
+        self._admins = admins
+    
+    def getAdmins(self) -> List[str]:
+        return self._admins
     
     def getTelegramGroup(self, unitCode:str) -> TelegramGroup:
+        unitCode = unitCode.upper()
         if _validUnitCode(unitCode):
-            if unitCode in self:
+            if unitCode in self._db:
                 unitName, link = self._db[unitCode]
-                return TelegramGroup(self._db, unitCode, unitName, link)
+                return TelegramGroup(unitCode, unitName, link)
             raise NoTelegramGroupException(unitCode)
         raise MalformedUnitCodeException(unitCode)
     
-    def __contains__(self, unitCode:str) -> bool:
-        return unitCode.upper() in self._db
-    
+   
     def getTelegramGroups(self) -> List[str]:
         tgs = []
         for unitCode in self._db:
             unitName, link = self._db[unitCode]
-            tgs.append(TelegramGroup(unitCode, unitName, link, self))
+            tgs.append(TelegramGroup(unitCode, unitName, link))
         return tgs
     
     def addTelegramGroup(self, unitCode:str, unitName:str, link:str) -> TelegramGroup:
@@ -116,7 +137,7 @@ class Persistence(Singleton):
         if len(unitName) == 0:
             raise BadUnitNameException(unitCode)
         self._db[unitCode] = (unitName, link)
-        return TelegramGroup(unitCode, unitName, link, self)
+        return TelegramGroup(unitCode, unitName, link)
     
     def __getitem__(self, unitCode:str):
         if unitCode in self._db:
@@ -126,10 +147,8 @@ class Persistence(Singleton):
     def __setitem__(self, unitCode:str, values:Tuple[str,str]):
         self._db[unitCode] = values
     
-    def deleteTelegramGroup(self, tg: TelegramGroup) -> bool:
+    def deleteTelegramGroup(self, tg: TelegramGroup) -> None:
         try:
             del self._db[tg.unitCode]
         except KeyError:
-            return False
-        else:
-            return True
+            raise NoTelegramGroupException()
