@@ -4,7 +4,7 @@ import shelve
 
 from singleton import Singleton
 
-_DATABASE = None
+_DATABASE: "Database" = None
 
 def setup(dbname:str, admins:List[str]) -> None:
     global _DATABASE
@@ -134,7 +134,6 @@ class Database(Singleton):
             raise MalformedUnitCodeException(unitCode)
         if not link.startswith("https://t.me/"):
             raise BadTelegramLinkException(unitCode, link)
-        if len(unitName) == 0:
             raise BadUnitNameException(unitCode)
         self._db[unitCode] = (unitName, link)
         return TelegramGroup(unitCode, unitName, link)
