@@ -122,7 +122,7 @@ class Database(Singleton):
         raise MalformedUnitCodeException(unitCode)
     
    
-    def getTelegramGroups(self) -> List[str]:
+    def getTelegramGroups(self) -> List[TelegramGroup]:
         tgs = []
         for unitCode in self._db:
             unitName, link = self._db[unitCode]
