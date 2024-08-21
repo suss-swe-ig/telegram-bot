@@ -8,12 +8,12 @@ _DATABASE: "Database" = None
 
 def setup(dbname:str, admins:List[str]) -> None:
     global _DATABASE
-    _DATABASE = Database(dbname, admins)
+    _DATABASE = SingletonDatabase(dbname, admins)
 
 class DatabaseNotReadyException(Exception):
     pass
 
-def getDatabase() -> "Database":
+def getDatabase() -> "SingletonDatabase":
     global _DATABASE
     if _DATABASE is None:
         raise DatabaseNotReadyException()
@@ -104,7 +104,7 @@ class TelegramGroup:
     def __gt__(self, other:"TelegramGroup") -> bool:
         return self._unitCode > other.unitCode
 
-class Database(Singleton):
+class SingletonDatabase(Singleton):
     def __init__(self, dbname:str, admins:List[str]):
         self._db = shelve.open(dbname)
         self._admins = admins
