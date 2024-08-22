@@ -134,6 +134,7 @@ class SingletonDatabase(Singleton):
             raise MalformedUnitCodeException(unitCode)
         if not link.startswith("https://t.me/"):
             raise BadTelegramLinkException(unitCode, link)
+        if len(unitName) == 0:
             raise BadUnitNameException(unitCode)
         self._db[unitCode] = (unitName, link)
         return TelegramGroup(unitCode, unitName, link)
