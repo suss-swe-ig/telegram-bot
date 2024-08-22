@@ -24,6 +24,7 @@ TestResults.xml
 .env
 #python
 __pycache__/*
+.venv/
 #database
 database.db
 warm.py
