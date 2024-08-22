@@ -44,14 +44,23 @@ The bot only supports commands in Direct Messaging (DM) mode.
 
 ## Feature Backlog
 
-* Refactor the codebase to seperate business logic from lower level implementations.
-* Log app status to telegram channel / group for monitoring
-* upport interaction in main channel or topic.
+* ~~Refactor the codebase to seperate business logic from lower level implementations~~
+* Log bot status to telegram channel / group for monitoring
+* Support interaction in main channel or topic.
 * Backup command to dump the database into a downloadable file
 * Restore command to upload the database to the Bot
 * Broadcast command to share events in telegram groups 
 * Reminder command to support the deadlines of each academic unit
 
+
+## Software Architecure
+![hello world](architecture.png)
+
+The Service Layer is responsible for handling interactions with the Telegram API Server. The SingletonService class interacts with the Telegram API Server via the AsyncTelebot class.  
+
+The Busines Logic Layer consists of Admin Class and User class that provides authentication and authorisation for specific commands. These 2 classes also execute the logic of these commands.  
+
+The Data Persistence Layer provides the SingletonDatabase class that reads and write the underlying data store powered by the Python Shelve module.  
 ## Who do I talk to?
 
 * Email us at suss_swe_ig@outlook.com for feedback

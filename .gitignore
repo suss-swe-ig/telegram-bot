@@ -26,3 +26,5 @@ TestResults.xml
 __pycache__/*
 #database
 database.db
+warm.py
+database.txt

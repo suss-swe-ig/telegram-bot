@@ -1,16 +1,21 @@
-import asyncio
 import logging 
+import shelve
+
 import config
-import bot
+import service
+
+import persistence
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
     logger = logging.getLogger(__name__)
     try:
-        token, admins, database = config.readConfig()
+        token, admins, dbname = config.readConfig()
     except config.ConfigException as e:
         logger.error(e)
         logger.info("suss-telegram-groups bot terminates")
     else:
-        suss_telegram_groups_bot = bot.setupBot(token, admins, logger, database)
-        asyncio.run(suss_telegram_groups_bot.polling())
+        logger.info("suss-telegram-groups bot starts")
+        persistence.setup(dbname, admins)
+        service.setup(token, logger)
+        service.run()
