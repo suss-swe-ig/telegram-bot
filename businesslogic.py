@@ -7,7 +7,7 @@ from telebot.async_telebot import AsyncTeleBot
 import telebot.async_telebot
 
 from persistence import getDatabase, TelegramGroup
-from persistence import MalformedUnitCodeException, NoTelegramGroupException, BadTelegramLinkException
+from persistence import MalformedUnitCodeException, NoTelegramGroupException, BadTelegramLinkException, BadUnitNameException
 
 class NonAdminUserException(Exception):
     def __init__(self, username, fullname):
@@ -135,8 +135,50 @@ class Admin(User):
         else:
             return [f"Success. {unitCode} {unitName} added"]
 
-    def update(self, msg:telebot.types.Message) -> List[str]:
-        return [f"Not Implemented"]
+    def update(self, message:telebot.types.Message) -> List[str]:
+        tokens = message.text.split()
+        if len(tokens) < 4:
+            return [f"Fail because the update command has missing arguements."]
+        unitCode = tokens[1].upper()
+        try:
+            tg = self._db.getTelegramGroup(unitCode)
+        except MalformedUnitCodeException:
+            self._logger.info(f"{self._username} attempted to update {unitCode} with malformed unit code.")
+            return [f"Fail because {unitCode} is a malformed unit code."]
+        except NoTelegramGroupException:
+            self._logger.info(f"{self._username} attempted to  update non-existent Telegram Group for {unitCode}")
+            return [f"Fail because no known telegram group for {unitCode}"]
+        else:
+            mode = tokens[2].upper()
+            if mode == "LINK":
+                link = tokens[3]
+                try:
+                    tg.updateLink(link)
+                except NoTelegramGroupException:
+                    self._logger.info(f"{self._username} attempted to update non-existent Telegram Group for {unitCode}")
+                    return [f"Fail because no known telegram group for {unitCode}"]
+                except BadTelegramLinkException:
+                    self._logger.info(f"{self._username} attempted to update telegram group for {unitCode} with bad link {link}")
+                    return [f"Fail because {link} is a bad link."]
+                else:
+                    self._logger.info(f"{self._username} updated telegram link for {unitCode} with link {link}")
+                    return [f"Success. Telegram link for {unitCode} has been updated."]
+            elif mode == "NAME":
+                name = tokens[3]
+                try:
+                    tg.updateUnitName(name)
+                except NoTelegramGroupException:
+                    self._logger.info(f"{self._username} attempted to update non-existent Telegram Group for {unitCode}")
+                    return [f"Fail because no known telegram group for {unitCode}"]
+                except BadUnitNameException:
+                    self._logger.info(f"{self._username} attempted to update telegram group for {unitCode} with bad unit name.")
+                    return [f"Fail because bad unit name is provided."]
+                else:
+                    self._logger.info(f"{self._username} updated unit name for {unitCode} with unit name {name}")
+                    return [f"Success. Unit name for {unitCode} has been updated."]
+            else:
+                self._logger.info(f"{self._username} attempted to update unknown attribute for telegram gorup {unitCode}")
+                return [f"Fail because update mode is neither link nor name."]
 
     def remove(self, message:telebot.types.Message) -> List[str]:
         tokens = message.text.split()
