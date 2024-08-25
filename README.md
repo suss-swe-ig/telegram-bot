@@ -42,6 +42,10 @@ The bot only supports commands in Direct Messaging (DM) mode.
 | /update [unit code] name [new name] | Update the unit name for the given unit. |
 | /rm [unit code] | Remove the invitation link for the given unit. |
 
+## Developer Onboarding
+
+Refer to the [Developer Onboarding Document](onboarding.md) if you are interested to contribute to this project.
+
 ## Feature Backlog
 
 * ~~Refactor the codebase to seperate business logic from lower level implementations~~
@@ -61,11 +65,6 @@ The Service Layer is responsible for handling interactions with the Telegram API
 The Busines Logic Layer consists of Admin Class and User class that provides authentication and authorisation for specific commands. These 2 classes also execute the logic of these commands.  
 
 The Data Persistence Layer provides the SingletonDatabase class that reads and write the underlying data store powered by the Python Shelve module.  
-
-## Developer Onboarding
-
-Refer to the [Developer Onboarding Document](onboarding.md) if you are interested to contribute to this project.
-
 
 ## Who do I talk to?
 
