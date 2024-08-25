@@ -61,6 +61,12 @@ The Service Layer is responsible for handling interactions with the Telegram API
 The Busines Logic Layer consists of Admin Class and User class that provides authentication and authorisation for specific commands. These 2 classes also execute the logic of these commands.  
 
 The Data Persistence Layer provides the SingletonDatabase class that reads and write the underlying data store powered by the Python Shelve module.  
+
+## Developer Onboarding
+
+Refer to the [Developer Onboarding Document](onboarding.md) if you are interested to contribute to this project.
+
+
 ## Who do I talk to?
 
 * Email us at suss_swe_ig@outlook.com for feedback
