@@ -48,14 +48,7 @@ Refer to the [Developer Onboarding Document](onboarding.md) if you are intereste
 
 ## Feature Backlog
 
-* ~~Refactor the codebase to seperate business logic from lower level implementations~~
-* Log bot status to telegram channel / group for monitoring
-* Support interaction in main channel or topic.
-* Backup command to dump the database into a downloadable file
-* Restore command to upload the database to the Bot
-* Broadcast command to share events in telegram groups 
-* Reminder command to support the deadlines of each academic unit
-
+Refer to the [Github Issues Board](https://github.com/suss-swe-ig/suss-telegram-groups/labels/enhancement) for this project. Pending features for development are labelled "enhancement".
 
 ## Software Architecure
 ![hello world](architecture.png)
