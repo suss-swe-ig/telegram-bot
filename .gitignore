@@ -23,7 +23,7 @@ TestResults.xml
 #dot env
 .env
 #python
-__pycache__/*
+**/__pycache__/**
 .venv/
 #database
 database.db

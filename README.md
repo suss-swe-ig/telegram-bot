@@ -11,6 +11,8 @@ Create a .env file in the root directory of the project with the following conte
 > TOKEN=[Telegram API Token]  
 > ADMINS=admin1,admin2,...  
 > DATABASE=[file name for database]  
+> TMP_DIR=[temporary directory to store downloaded file, defaulted to system tmp directory]
+> COURSE_INFO_CACHE_DAYS=[number of days before redownloading file, defaulted to 30]
 
 TOKEN is the Telegram API Token.  
 
