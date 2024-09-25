@@ -1,7 +1,8 @@
 import urllib3
 import tempfile
 import requests
-import logging
+import asyncio
+import aiohttp
 
 from pathlib import Path
 from dotenv import dotenv_values
@@ -27,7 +28,7 @@ Path(tmpdir).mkdir(parents=True, exist_ok=True)
 
 # Disable warning on verifying SSL
 urllib3.disable_warnings()
-def downloadCourseInfo(courseCode):
+async def downloadCourseInfo(courseCode):
     response = { 'statusCode': 200, 'msg': 'OK' }
     if courseCode is None or len(courseCode) == 0:
         # No course code provided
@@ -48,10 +49,13 @@ def downloadCourseInfo(courseCode):
             return response
 
     url = f'https://sims1.suss.edu.sg/ESERVICE/Public/ViewCourse/ViewCourse.aspx?crsecd={courseCode}&viewtype=pdf&isft=0'
-    res = requests.get(url, headers={ 'User-Agent': 'Mozilla/5.0' }, verify=False)
-    if res.status_code != 200:
+    async with aiohttp.ClientSession() as session:
+        async with session.get(url, headers={'User-Agent': 'Mozilla/5.0'}, verify_ssl=False) as res:
+            content = await res.read()
+
+    if res.status != 200:
         # Server unable to return the requested resource
-        response['statusCode'] = res.status_code
+        response['statusCode'] = res.status
         response['msg'] = f'Server unable to provide resource. {courseCode}'
         return response
 
@@ -63,7 +67,7 @@ def downloadCourseInfo(courseCode):
 
     # Success
     with open(filename, 'wb') as outfile:
-        outfile.write(res.content)
+        outfile.write(content)
         outfile.close()
     response['pdf'] = filename
     return response

@@ -137,7 +137,7 @@ class SingletonService(Singleton):
                 courseCode = next(chatTitle, None)
 
             print(f'downloading course info for {courseCode}')
-            response = courseinfo.downloadCourseInfo(courseCode)
+            response = await courseinfo.downloadCourseInfo(courseCode)
             print(f'Response from downloadCourseInfo: {response}')
 
             pdf = response.get('pdf')
