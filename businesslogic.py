@@ -68,7 +68,7 @@ class User:
         admins = self._db.getAdmins()
         msg = f"The administrator is @{admins[0]}"
         if len(admins) > 1:
-            msg = f"The administrators are {", ".join(["@" + admin for admin in admins])}."
+            msg = f"The administrators are {', '.join(['@'+ admin for admin in admins])}."
         msg = "Contact an administrator to add or remove a telegram chat group. \n\n" + msg
         return [msg]
 
