@@ -4,6 +4,7 @@ import shelve
 
 from singleton import Singleton
 
+
 _DATABASE: "SingletonDatabase" = None
 
 def setup(dbname:str, admins:List[str]) -> None:
@@ -152,3 +153,33 @@ class SingletonDatabase(Singleton):
             del self._db[tg.unitCode]
         except KeyError:
             raise NoTelegramGroupException()
+
+    def getBlockedUsers(self) -> dict[str, str]:
+        return self._db.get('rbac:blocked_user', {})
+
+    def updateBlockedUsers(self, users: dict[str, str]) -> None:
+        self._db['rbac:blocked_user'] = users
+
+    def getRoles(self) -> dict[str, object]:
+        return self._db.get('rbac:role', {})
+
+    def updateRoles(self, roles: dict[str, object]) -> None:
+        self._db['rbac:role'] = roles
+
+    def getPermissions(self) -> dict[str, object]:
+        return self._db.get('rbac:perm', {})
+
+    def updatePermissions(self, perms: dict[str, object]) -> None:
+        self._db['rbac:perm'] = perms
+
+    def getUserRoleMap(self) -> dict[str, set[str]]:
+        return self._db.get('rbac:role_perm', {})
+
+    def updateUserRoleMap(self, userRoleMap: dict[str, set[str]]) -> None:
+        self._db['rbac:role_perm'] = userRoleMap
+
+    def getRolePermMap(self) -> dict[str, set[tuple[str, str]]]:
+        return self._db.get('rbac:user_perm', {})
+
+    def updateRolePermMap(self, rolePermMap: dict[str, set[tuple[str, str]]]) -> None:
+        self._db['rbac:role_perm'] = rolePermMap
