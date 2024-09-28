@@ -46,7 +46,7 @@ The bot only supports commands in Direct Messaging (DM) mode.
 
 * ~~Refactor the codebase to seperate business logic from lower level implementations~~
 * Log bot status to telegram channel / group for monitoring
-* Support interaction in main channel or topic.
+* ~~Support interaction in main channel or topic.~~
 * Backup command to dump the database into a downloadable file
 * Restore command to upload the database to the Bot
 * Broadcast command to share events in telegram groups 
