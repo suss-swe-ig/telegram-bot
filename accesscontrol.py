@@ -18,6 +18,14 @@ class Permission:
     oper_name: str
 
 
+class InvalidUserError(Exception):
+    def __init__(self, user_name: str, msg: Optional[str] = None):
+        if not msg:
+            msg = f"User '{user_name}' is invalid."
+        super().__init__(msg)
+        self.user_name = user_name
+
+
 class InvalidPermissionError(Exception):
     def __init__(self, perm: tuple[str, str], msg: Optional[str] = None):
         obj_name, oper_name = perm
@@ -241,3 +249,39 @@ def user_is_authorized(user_name: str, perm: tuple[str, str]) -> bool:
     if user_is_blocked(user_name):
         return False
     return user_has_perm(user_name, perm)
+
+
+def block_user(user_name: str, reason: str) -> None:
+    """Adds the given user to the block list."""
+
+    if not user_name:
+        raise InvalidUserError("User name must be specified.")
+
+    db = getDatabase()
+
+    blocked_users = db.getBlockedUsers()
+
+    if user_name in blocked_users:
+        raise InvalidUserError(user_name, f"User {user_name} is already blocked.")
+
+    blocked_users[user_name] = reason
+
+    db.updateBlockedUsers(blocked_users)
+
+
+def unblock_user(user_name: str) -> None:
+    """Removes the given user from the block list."""
+
+    if not user_name:
+        raise InvalidUserError("User name must be specified.")
+
+    db = getDatabase()
+
+    blocked_users = db.getBlockedUsers()
+
+    if user_name not in blocked_users:
+        raise InvalidUserError(user_name, "User {user_name} is not blocked.")
+
+    del blocked_users[user_name]
+
+    db.updateBlockedUsers(blocked_users)
