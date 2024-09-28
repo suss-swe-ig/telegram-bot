@@ -21,7 +21,7 @@ class Permission:
 class InvalidUserError(Exception):
     def __init__(self, user_name: str, msg: Optional[str] = None):
         if not msg:
-            msg = f"User '{user_name}' is invalid."
+            msg = f"User '{user_name}' is invalid." if user_name else "Invalid user."
         super().__init__(msg)
         self.user_name = user_name
 
@@ -201,7 +201,7 @@ def remove_role_perm(role: Role | str, perm: tuple[str, str]) -> None:
 
 def get_user_roles(user_name: str) -> Iterable[str]:
     if not user_name:
-        raise ValueError('User name must be specified.')
+        raise InvalidUserError(user_name, "User name must be specified.")
 
     user_role_map = getDatabase().getUserRoleMap()
     return user_role_map.get(user_name, [])
@@ -209,7 +209,7 @@ def get_user_roles(user_name: str) -> Iterable[str]:
 
 def get_user_perms(user_name: str) -> Iterable[tuple[str, tuple[str, str]]]:
     if not user_name:
-        raise ValueError('User name must be specified.')
+        raise InvalidUserError(user_name, "User name must be specified.")
 
     db = getDatabase()
 
@@ -221,7 +221,7 @@ def get_user_perms(user_name: str) -> Iterable[tuple[str, tuple[str, str]]]:
 
 def user_has_role(user_name: str, role: Role | str) -> bool:
     if not user_name:
-        raise ValueError('User name must be specified.')
+        raise InvalidUserError(user_name, "User name must be specified.")
 
     role_name = _to_role_name(role)
     if not role_name:
@@ -232,14 +232,14 @@ def user_has_role(user_name: str, role: Role | str) -> bool:
 
 def user_has_perm(user_name: str, perm: tuple[str, str]) -> bool:
     if not user_name:
-        raise ValueError('User name must be specified.')
+        raise InvalidUserError(user_name, "User name must be specified.")
 
     return any(perm == perm2 for perm2 in get_user_perms(user_name))
 
 
 def user_is_blocked(user_name: str) -> bool:
     if not user_name:
-        raise ValueError('User name must be specified.')
+        raise InvalidUserError(user_name, "User name must be specified.")
 
     blocked_users = getDatabase().getBlockedUsers()
     return any(user_name == name for name in blocked_users.keys())
@@ -255,7 +255,7 @@ def block_user(user_name: str, reason: str) -> None:
     """Adds the given user to the block list."""
 
     if not user_name:
-        raise InvalidUserError("User name must be specified.")
+        raise InvalidUserError(user_name, "User name must be specified.")
 
     db = getDatabase()
 
@@ -280,7 +280,7 @@ def unblock_user(user_name: str) -> None:
     blocked_users = db.getBlockedUsers()
 
     if user_name not in blocked_users:
-        raise InvalidUserError(user_name, "User {user_name} is not blocked.")
+        raise InvalidUserError(user_name, f"User {user_name} is not blocked.")
 
     del blocked_users[user_name]
 
