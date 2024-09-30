@@ -24,19 +24,19 @@ def _validUnitCode(unitCode:str) -> bool:
 
 class MalformedUnitCodeException(Exception):
     def __init__(self, unitCode:str) -> None:
-        Exception.__init__(self, f"{unitCode} is a malformed unit code")
+        super().__init__(f"{unitCode} is a malformed unit code")
 
 class NoTelegramGroupException(Exception):
     def __init__(self, unitCode:str) -> None:
-        Exception.__init__(self, f"No known telegram group for {unitCode}")
+        super().__init__(f"No known telegram group for {unitCode}")
 
 class BadTelegramLinkException(Exception):
     def __init__(self, unitCode:str, link:str) -> None:
-        Exception.__init__(self, f"Bad link {link} given for {unitCode}")
+        super().__init__(f"Bad link {link} given for {unitCode}")
 
 class BadUnitNameException(Exception):
     def __init__(self, unitCode:str):
-        Exception.__init__(self, f"Bad Unit Name for {unitCode}")
+        super().__init__(f"Bad Unit Name for {unitCode}")
 
 class TelegramGroup:
     def __init__(self, unitCode:str, unitName:str, link:str) -> None:
