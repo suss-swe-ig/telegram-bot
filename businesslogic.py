@@ -11,7 +11,7 @@ from persistence import MalformedUnitCodeException, NoTelegramGroupException, Ba
 
 class NonAdminUserException(Exception):
     def __init__(self, username, fullname):
-        Exception.__init__(self, f"{username} {fullname} is not an administrator")
+        super().__init__(f"{username} {fullname} is not an administrator")
 
 class User:
     def __init__(self, username:str, fullname:str, logger:Logger):
@@ -97,7 +97,7 @@ class User:
 
 class Admin(User):
     def __init__(self, username:str, fullname:str, logger:Logger):
-        User.__init__(self, username, fullname, logger)
+        super().__init__(username, fullname, logger)
         if username not in getDatabase().getAdmins():
             raise NonAdminUserException(username, fullname)
 
