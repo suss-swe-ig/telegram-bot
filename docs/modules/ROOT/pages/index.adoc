@@ -1,0 +1,73 @@
+= SUSS Telegram Groups Bot
+
+The telegram handler for this bot is `@SUSS_Telegram_Groups_Bot`.
+
+You may query this bot to retrieve the telegram invitation link for your unit.
+
+== Configuration
+
+Create a `.env` file in the root directory of the project with the following content:
+
+----
+TOKEN=[Telegram API Token]  
+ADMINS=admin1,admin2,...  
+DATABASE=[file name for database]  
+----
+
+- `TOKEN` is the Telegram API Token.
+- `ADMINS` is a list of Telegram usernames (separated by commas) who are allowed to perform administrative actions on the bot.
+- `DATABASE` is the filename of the persistence database which contains the telegram invitation links.
+
+== How to Use the Bot?
+
+The bot only supports commands in Direct Messaging (DM) mode.
+
+=== For All Users
+
+[cols="2,3"]
+|===
+| Command  | Description
+| `/start` | Say hi to the user
+| `/welcome` | Say hi to the user
+| `/get all` | Retrieve all telegram invitation links
+| `/get [unit code]` | Retrieve the telegram invitation link for the unit
+| `/admins` | Retrieve the list of administrators
+| `/help` | Display the commands available to the user
+|===
+
+=== For Admin Users
+
+[cols="2,3"]
+|===
+| Command | Description
+| `/add [unit code] [link] [unit name]` | Add the invitation link for the given unit.
+| `/update [unit code] link [new link]` | Update the invitation link for the given unit.
+| `/update [unit code] name [new name]` | Update the unit name for the given unit.
+| `/rm [unit code]` | Remove the invitation link for the given unit.
+|===
+
+== Feature Backlog
+
+* [line-through]#Refactor the codebase to separate business logic from lower-level implementations#
+* Log bot status to Telegram channel/group for monitoring
+* [line-through]#Support interaction in main channel or topic#
+* Broadcast command to share events in telegram groups
+* Reminder command to support the deadlines of each academic unit
+* Courseinfo command to access course info
+* RBAC for granular authorization and privileges for different users
+
+== Software Architecture
+
+image::architecture.png[]
+
+The *Service Layer* is responsible for handling interactions with the Telegram API Server. The `SingletonService` class interacts with the Telegram API Server via the `AsyncTelebot` class.
+
+The *Business Logic Layer* consists of the `Admin` class and `User` class that provide authentication and authorization for specific commands. These two classes also execute the logic of these commands.
+
+The *Data Persistence Layer* provides the `SingletonDatabase` class that reads and writes the underlying data store powered by the Python Shelve module.
+
+== Who Do I Talk To?
+
+- Email us at `suss_swe_ig@outlook.com` for feedback.
+- If you want to add a Telegram link to our bot, contact `@geodome` on Telegram.
+
