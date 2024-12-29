@@ -1,0 +1,22 @@
+= Contributing
+
+Thank you for considering contributing to our project! Your help is appreciated.
+
+== How to Contribute
+TODO
+
+== Code of Conduct
+
+- Be respectful and constructive in your communication.
+- Avoid discriminatory language or behavior.
+- Report any concerns to the project maintainers.
+
+== Development Standards
+
+- Write clean and modular code.
+- Follow the existing style guide.
+- Add tests for all new features.
+
+== Need Help?
+
+If you have any questions or need assistance, feel free to open an issue or contact the maintainers.
