@@ -104,7 +104,7 @@ class TelegramGroup:
     def __gt__(self, other:"TelegramGroup") -> bool:
         return self._unitCode > other.unitCode
 
-class SingletonDatabase(Singleton):
+class SingletonDatabase(metaclass=Singleton):
     def __init__(self, dbname:str, admins:List[str]):
         self._db = shelve.open(dbname)
         self._admins = admins

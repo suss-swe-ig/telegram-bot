@@ -25,7 +25,7 @@ def run():
         raise ServiceNotReadyException()
     _SERVICE.run()
     
-class SingletonService(Singleton):
+class SingletonService(metaclass=Singleton):
 
     def __init__(self, token:str, logger:logging.Logger) -> None:
         self._token = token
