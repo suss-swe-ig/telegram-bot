@@ -9,6 +9,7 @@ from telebot.async_telebot import AsyncTeleBot
 
 from singleton import Singleton
 from businesslogic import User, Admin, NonAdminUserException
+from modules import courseinfo
 
 _SERVICE = None
 
@@ -125,3 +126,26 @@ class SingletonService(Singleton):
                 for reply in replies:
                     await self._telebot.reply_to(message, reply)
 
+        @self._telebot.message_handler(commands=["courseinfo"])
+        async def getcourseinfo(message:telebot.types.Message) -> None:
+            cmds = message.json.get('text', '').split(' ')
+            courseCode = None
+            if len(cmds) > 1:
+                courseCode = cmds[1].upper()
+            else:
+                chatTitle = filter(lambda x: len(x) == 6, message.chat.title.split(' '))
+                courseCode = next(chatTitle, None)
+
+            print(f'downloading course info for {courseCode}')
+            response = await courseinfo.downloadCourseInfo(courseCode)
+            print(f'Response from downloadCourseInfo: {response}')
+
+            pdf = response.get('pdf')
+            if pdf is not None:
+                chatId = message.chat.id
+                messageId = message.message_id
+                with open(pdf, 'rb') as file:
+                    await self._telebot.send_document(chatId, file, caption="Here's the course information", reply_to_message_id=messageId)
+                return
+
+            await self._telebot.reply_to(message, 'I am unable to find the course information.')
